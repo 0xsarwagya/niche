@@ -1,5 +1,6 @@
 import AppKit
 import Observation
+import SwiftUI
 
 /// Observable now-playing state fed by a NowPlayingSource: artwork fetched on track change,
 /// a locally-advancing elapsed time for the scrubber, and playback actions routed to a
@@ -9,6 +10,7 @@ import Observation
 final class NowPlayingModel {
     private(set) var current: NowPlaying?
     private(set) var artwork: NSImage?
+    private(set) var accentColor: Color?
     private(set) var displayElapsed: TimeInterval = 0
     private(set) var hud: SystemLevel?
     private(set) var timerRemaining: TimeInterval?
@@ -115,6 +117,7 @@ final class NowPlayingModel {
         displayElapsed = value?.elapsed ?? 0
         if value == nil {
             artwork = nil
+            accentColor = nil
         } else if trackChanged {
             loadArtwork()
         }
@@ -134,12 +137,14 @@ final class NowPlayingModel {
 
     private func loadArtwork() {
         artwork = nil
+        accentColor = nil
         artworkTask?.cancel()
         artworkTask = Task { [weak self] in
             for _ in 0..<3 {
                 guard let self else { return }
                 if let data = await self.artworkSource.currentArtwork(), let image = NSImage(data: data) {
                     self.artwork = image
+                    self.accentColor = ArtworkColor.accent(from: image).map { Color(nsColor: $0) }
                     return
                 }
                 try? await Task.sleep(for: .milliseconds(600))

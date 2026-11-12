@@ -127,11 +127,12 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 - Countdown timers, started from a menu bar item (which also has Quit).
 - Weather glance on hovering the idle notch (opt-in location; keyless Open-Meteo).
 - Launch at login, toggled from the menu bar.
+- Accent colour (equalizer, scrubber) derived from the album artwork.
 
 **Planned**
 
-- Art-derived accent tint from the album artwork.
 - Suppress the system volume/brightness OSD; Spaces HUD.
+- AirPods / Bluetooth battery; bring-your-own weather + Keychain; multi-display.
 - Declarative bring-your-own weather providers + Keychain key storage.
 - Sparkle auto-updates.
 

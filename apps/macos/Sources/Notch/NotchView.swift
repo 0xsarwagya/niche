@@ -25,6 +25,10 @@ struct NotchView: View {
         NotchGeometry.islandSize(content: notchContent, hovered: model.isHovered, notch: notch)
     }
 
+    private var accent: Color {
+        model.accentColor ?? Color(red: 0.78, green: 0.97, blue: 0.32)
+    }
+
     var body: some View {
         ZStack(alignment: .top) {
             Color.clear.allowsHitTesting(false)
@@ -81,7 +85,7 @@ struct NotchView: View {
         VStack(spacing: 8) {
             trackRow(track)
             if expanded, track.duration > 0 {
-                Scrubber(elapsed: model.displayElapsed, duration: track.duration) { model.seek(to: $0) }
+                Scrubber(elapsed: model.displayElapsed, duration: track.duration, color: accent) { model.seek(to: $0) }
                     .transition(.opacity)
             }
         }
@@ -105,7 +109,7 @@ struct NotchView: View {
             if expanded {
                 transport(track).transition(.opacity)
             } else {
-                PlayingBars(isPlaying: track.isPlaying).transition(.opacity)
+                PlayingBars(isPlaying: track.isPlaying, color: accent).transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -228,6 +232,7 @@ private struct ControlButton: View {
 private struct Scrubber: View {
     let elapsed: TimeInterval
     let duration: TimeInterval
+    let color: Color
     let onSeek: (TimeInterval) -> Void
 
     @State private var dragFraction: Double?
@@ -237,7 +242,7 @@ private struct Scrubber: View {
             let fraction = dragFraction ?? (duration > 0 ? clamp(elapsed / duration) : 0)
             ZStack(alignment: .leading) {
                 Capsule().fill(.white.opacity(0.22)).frame(height: 3)
-                Capsule().fill(.white).frame(width: geo.size.width * fraction, height: 3)
+                Capsule().fill(color).frame(width: geo.size.width * fraction, height: 3)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
@@ -260,6 +265,7 @@ private struct Scrubber: View {
 /// Three lime bars that bounce while audio is playing.
 private struct PlayingBars: View {
     var isPlaying: Bool
+    var color: Color
 
     @State private var high = false
     private let lows: [CGFloat] = [5, 5, 5]
@@ -269,7 +275,7 @@ private struct PlayingBars: View {
         HStack(spacing: 3) {
             ForEach(0..<3, id: \.self) { index in
                 Capsule()
-                    .fill(Color(red: 0.78, green: 0.97, blue: 0.32))
+                    .fill(color)
                     .frame(width: 3, height: high && isPlaying ? highs[index] : lows[index])
             }
         }
