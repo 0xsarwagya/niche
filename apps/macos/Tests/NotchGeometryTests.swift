@@ -9,9 +9,8 @@ struct NotchGeometryTests {
         #expect(frame == CGRect(x: 620, y: 870, width: 200, height: 30))
     }
 
-    @Test func panelHangsBelowTheNotchInset() {
-        let screen = CGRect(x: 0, y: 0, width: 1440, height: 900)
-        let frame = NotchGeometry.panelFrame(in: screen, topInset: 40, size: CGSize(width: 200, height: 30))
-        #expect(frame == CGRect(x: 620, y: 830, width: 200, height: 30))
+    @Test func idleIslandMatchesTheNotch() {
+        let size = NotchGeometry.islandSize(hasTrack: false, hovered: false, notch: .fake)
+        #expect(size == CGSize(width: 200, height: 32))
     }
 }

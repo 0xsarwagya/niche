@@ -1,23 +1,23 @@
 import CoreGraphics
 
 /// Pure placement math for the notch panel; no AppKit so it stays testable.
-/// The panel is a clear top-centered stage; the SwiftUI island sizes itself inside it.
+/// The panel is a clear top-anchored stage; the SwiftUI island wraps the notch inside it.
 enum NotchGeometry {
-    static let defaultSize = CGSize(width: 420, height: 90)
+    static let stageSize = CGSize(width: 440, height: 150)
 
-    /// Frame centered horizontally and hung from `topInset` below the screen's top edge,
-    /// in screen coordinates. On notched Macs `topInset` is the notch height, so the island
-    /// clears the hardware notch instead of hiding behind it.
-    static func panelFrame(in screen: CGRect, topInset: CGFloat = 0, size: CGSize = defaultSize) -> CGRect {
+    /// Frame centered horizontally against the top edge of `screen`, in screen coordinates.
+    static func panelFrame(in screen: CGRect, size: CGSize = stageSize) -> CGRect {
         let originX = screen.minX + (screen.width - size.width) / 2
-        let originY = screen.maxY - topInset - size.height
+        let originY = screen.maxY - size.height
         return CGRect(x: originX, y: originY, width: size.width, height: size.height)
     }
 
-    /// Size of the black island for the current state; the single source of truth for both
-    /// the SwiftUI frame and the panel's interactive hit region.
-    static func islandSize(hasTrack: Bool, hovered: Bool) -> CGSize {
-        guard hasTrack else { return CGSize(width: 200, height: 32) }
-        return hovered ? CGSize(width: 384, height: 64) : CGSize(width: 300, height: 46)
+    /// Island size for the current state, including the notch footprint at the top.
+    /// The single source of truth for the SwiftUI frame and the panel's hit region.
+    static func islandSize(hasTrack: Bool, hovered: Bool, notch: NotchMetrics) -> CGSize {
+        guard hasTrack else { return CGSize(width: notch.width, height: notch.height) }
+        let width: CGFloat = hovered ? max(384, notch.width + 190) : max(300, notch.width + 100)
+        let contentHeight: CGFloat = hovered ? 64 : 48
+        return CGSize(width: width, height: notch.height + contentHeight)
     }
 }

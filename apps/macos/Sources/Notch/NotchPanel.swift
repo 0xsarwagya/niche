@@ -6,14 +6,16 @@ import os
 /// clear margins of the panel stay click-through.
 private final class PassthroughHostingView: NSHostingView<NotchView> {
     private let model: NowPlayingModel
+    private let notch: NotchMetrics
 
-    init(model: NowPlayingModel) {
+    init(model: NowPlayingModel, notch: NotchMetrics) {
         self.model = model
-        super.init(rootView: NotchView(model: model))
+        self.notch = notch
+        super.init(rootView: NotchView(model: model, notch: notch))
     }
 
     @MainActor required init(rootView: NotchView) {
-        fatalError("use init(model:)")
+        fatalError("use init(model:notch:)")
     }
 
     required init?(coder: NSCoder) {
@@ -22,7 +24,7 @@ private final class PassthroughHostingView: NSHostingView<NotchView> {
 
     override func hitTest(_ point: NSPoint) -> NSView? {
         let local = convert(point, from: superview)
-        let size = NotchGeometry.islandSize(hasTrack: model.current != nil, hovered: model.isHovered)
+        let size = NotchGeometry.islandSize(hasTrack: model.current != nil, hovered: model.isHovered, notch: notch)
         let islandRect = CGRect(
             x: (bounds.width - size.width) / 2,
             y: isFlipped ? 0 : bounds.height - size.height,
@@ -38,7 +40,8 @@ final class NotchPanel: NSPanel {
     private static let logger = Logger(subsystem: "com.niche.app", category: "NotchPanel")
 
     init(screen: NSScreen, model: NowPlayingModel) {
-        let frame = NotchGeometry.panelFrame(in: screen.frame, topInset: screen.safeAreaInsets.top)
+        let notch = NotchMetrics(screen: screen)
+        let frame = NotchGeometry.panelFrame(in: screen.frame)
         super.init(
             contentRect: frame,
             styleMask: [.borderless, .nonactivatingPanel],
@@ -54,7 +57,7 @@ final class NotchPanel: NSPanel {
         isMovable = false
         hidesOnDeactivate = false
 
-        let hosting = PassthroughHostingView(model: model)
+        let hosting = PassthroughHostingView(model: model, notch: notch)
         hosting.sizingOptions = []
         hosting.autoresizingMask = [.width, .height]
         contentView = hosting
