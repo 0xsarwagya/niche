@@ -24,7 +24,10 @@ private final class PassthroughHostingView: NSHostingView<NotchView> {
 
     override func hitTest(_ point: NSPoint) -> NSView? {
         let local = convert(point, from: superview)
-        let size = NotchGeometry.islandSize(hasTrack: model.current != nil, hovered: model.isHovered, hud: model.hud != nil, notch: notch)
+        let content = NotchGeometry.content(
+            hasTrack: model.current != nil, hud: model.hud != nil, timer: model.timerRemaining != nil
+        )
+        let size = NotchGeometry.islandSize(content: content, hovered: model.isHovered, notch: notch)
         let islandRect = CGRect(
             x: (bounds.width - size.width) / 2,
             y: isFlipped ? 0 : bounds.height - size.height,

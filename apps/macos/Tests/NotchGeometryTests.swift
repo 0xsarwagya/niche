@@ -10,7 +10,15 @@ struct NotchGeometryTests {
     }
 
     @Test func idleIslandMatchesTheNotch() {
-        let size = NotchGeometry.islandSize(hasTrack: false, hovered: false, hud: false, notch: .fake)
+        let size = NotchGeometry.islandSize(content: .hidden, hovered: false, notch: .fake)
         #expect(size == CGSize(width: 200, height: 32))
+    }
+
+    @Test func hudWinsOverTimerAndTrack() {
+        #expect(NotchGeometry.content(hasTrack: true, hud: true, timer: true) == .hud)
+    }
+
+    @Test func timerWinsOverTrack() {
+        #expect(NotchGeometry.content(hasTrack: true, hud: false, timer: true) == .timer)
     }
 }

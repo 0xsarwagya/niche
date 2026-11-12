@@ -11,6 +11,8 @@ final class NowPlayingModel {
     private(set) var artwork: NSImage?
     private(set) var displayElapsed: TimeInterval = 0
     private(set) var hud: SystemLevel?
+    private(set) var timerRemaining: TimeInterval?
+    private(set) var timerTotal: TimeInterval = 0
     var isHovered = false
 
     private let controller: any MediaController
@@ -20,6 +22,7 @@ final class NowPlayingModel {
     private var tickerTask: Task<Void, Never>?
     private var levelsTasks: [Task<Void, Never>] = []
     private var hudTask: Task<Void, Never>?
+    private var countdownTask: Task<Void, Never>?
 
     init(controller: any MediaController, artworkSource: any ArtworkSource) {
         self.controller = controller
@@ -58,6 +61,8 @@ final class NowPlayingModel {
         levelsTasks.removeAll()
         hudTask?.cancel()
         hudTask = nil
+        countdownTask?.cancel()
+        countdownTask = nil
     }
 
     private func presentHUD(_ level: SystemLevel) {
@@ -77,6 +82,31 @@ final class NowPlayingModel {
     func seek(to seconds: TimeInterval) {
         displayElapsed = seconds
         Task { await controller.seek(toMicros: Int(seconds * 1_000_000)) }
+    }
+
+    func startTimer(_ duration: TimeInterval) {
+        timerTotal = duration
+        timerRemaining = duration
+        countdownTask?.cancel()
+        countdownTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(1))
+                guard let self, let remaining = self.timerRemaining else { return }
+                if remaining <= 1 {
+                    self.timerRemaining = 0
+                    try? await Task.sleep(for: .seconds(2))
+                    self.timerRemaining = nil
+                    return
+                }
+                self.timerRemaining = remaining - 1
+            }
+        }
+    }
+
+    func cancelTimer() {
+        countdownTask?.cancel()
+        countdownTask = nil
+        timerRemaining = nil
     }
 
     private func apply(_ value: NowPlaying?) {

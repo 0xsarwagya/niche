@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// The notch surface: one broad black notch — a flat-top, rounded-bottom bar as wide as
-/// the content, anchored at the screen top so the physical notch sits embedded in its
-/// centre. Now-playing hangs below the notch; hover reveals transport controls and a scrubber.
+/// The notch surface: one broad black notch anchored at the screen top with the physical
+/// notch embedded in its centre. It shows (in priority) a transient volume/brightness/battery
+/// HUD, a running timer, or now-playing (with hover-reveal controls and a scrubber).
 struct NotchView: View {
     let model: NowPlayingModel
     let notch: NotchMetrics
@@ -10,21 +10,26 @@ struct NotchView: View {
     private var track: NowPlaying? { model.current }
     private var expanded: Bool { track != nil && model.isHovered }
 
-    private var islandSize: CGSize {
-        NotchGeometry.islandSize(
-            hasTrack: track != nil, hovered: model.isHovered, hud: model.hud != nil, notch: notch
+    private var notchContent: NotchGeometry.Content {
+        NotchGeometry.content(
+            hasTrack: track != nil, hud: model.hud != nil, timer: model.timerRemaining != nil
         )
+    }
+
+    private var islandSize: CGSize {
+        NotchGeometry.islandSize(content: notchContent, hovered: model.isHovered, notch: notch)
     }
 
     var body: some View {
         ZStack(alignment: .top) {
             Color.clear.allowsHitTesting(false)
-            if track != nil || model.hud != nil {
+            if notchContent != .hidden {
                 island
                     .onHover { model.isHovered = $0 }
                     .animation(.spring(duration: 0.4, bounce: 0.2), value: expanded)
                     .animation(.spring(duration: 0.4, bounce: 0.2), value: track)
                     .animation(.spring(duration: 0.4, bounce: 0.2), value: model.hud)
+                    .animation(.spring(duration: 0.4, bounce: 0.2), value: model.timerRemaining != nil)
             }
         }
     }
@@ -39,24 +44,33 @@ struct NotchView: View {
 
     @ViewBuilder
     private var content: some View {
-        if let hud = model.hud {
-            hudContent(hud)
-                .foregroundStyle(.white)
-                .padding(.horizontal, 16)
-                .frame(height: islandSize.height - notch.height)
-                .padding(.top, notch.height)
-        } else if let track {
-            VStack(spacing: 8) {
-                trackRow(track)
-                if expanded, track.duration > 0 {
-                    Scrubber(elapsed: model.displayElapsed, duration: track.duration) { model.seek(to: $0) }
-                        .transition(.opacity)
-                }
+        Group {
+            switch notchContent {
+            case .hidden:
+                EmptyView()
+            case .hud:
+                if let hud = model.hud { levelRow(symbol: symbol(for: hud), fraction: hud.value) }
+            case .timer:
+                if let remaining = model.timerRemaining { timerRow(remaining) }
+            case .nowPlaying:
+                if let track { nowPlayingBody(track) }
             }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 14)
-            .frame(height: islandSize.height - notch.height)
-            .padding(.top, notch.height)
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 14)
+        .frame(height: islandSize.height - notch.height)
+        .padding(.top, notch.height)
+    }
+
+    // MARK: Now playing
+
+    private func nowPlayingBody(_ track: NowPlaying) -> some View {
+        VStack(spacing: 8) {
+            trackRow(track)
+            if expanded, track.duration > 0 {
+                Scrubber(elapsed: model.displayElapsed, duration: track.duration) { model.seek(to: $0) }
+                    .transition(.opacity)
+            }
         }
     }
 
@@ -110,19 +124,33 @@ struct NotchView: View {
         }
     }
 
-    private func hudContent(_ level: SystemLevel) -> some View {
+    // MARK: HUD and timer
+
+    private func levelRow(symbol: String, fraction: Double) -> some View {
         HStack(spacing: 11) {
-            Image(systemName: symbol(for: level))
+            Image(systemName: symbol)
                 .font(.system(size: 14, weight: .semibold))
                 .frame(width: 20)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule().fill(.white.opacity(0.22)).frame(height: 4)
-                    Capsule().fill(.white).frame(width: geo.size.width * min(max(level.value, 0), 1), height: 4)
+                    Capsule().fill(.white).frame(width: geo.size.width * min(max(fraction, 0), 1), height: 4)
                 }
                 .frame(maxHeight: .infinity)
             }
             .frame(height: 10)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func timerRow(_ remaining: TimeInterval) -> some View {
+        HStack(spacing: 11) {
+            Image(systemName: "timer")
+                .font(.system(size: 14, weight: .semibold))
+                .frame(width: 20)
+            Text(NotchView.format(remaining))
+                .font(.system(size: 15, weight: .semibold).monospacedDigit())
+            Spacer(minLength: 6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -133,6 +161,11 @@ struct NotchView: View {
         case .brightness: "sun.max.fill"
         case .battery: level.charging ? "bolt.fill" : "battery.100"
         }
+    }
+
+    static func format(_ remaining: TimeInterval) -> String {
+        let seconds = max(0, Int(remaining.rounded()))
+        return String(format: "%d:%02d", seconds / 60, seconds % 60)
     }
 }
 
