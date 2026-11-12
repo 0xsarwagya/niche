@@ -120,15 +120,16 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 
 - Notch `NSPanel` surface: borderless, non-activating, pinned at the notch across
   every Space.
-- Now playing: live track and artist in the notch, with hover-to-reveal
-  play / pause / skip controls, via the vendored `ungive/mediaremote-adapter`.
+- Now playing: live track, artist, album artwork, and a draggable scrubber, with
+  hover-to-reveal play / pause / skip controls, via the vendored `ungive/mediaremote-adapter`.
+- Volume & brightness HUD at the notch.
 - Weather seam with the keyless `OpenMeteoProvider`.
 
 **Planned**
 
-- Album artwork, art-derived tint, and a draggable scrubber.
+- Art-derived accent tint from the album artwork.
+- Suppress the system volume/brightness OSD; Spaces HUD.
 - Declarative bring-your-own weather providers + Keychain key storage.
-- Volume / brightness / Spaces HUD replacements.
 - Sparkle auto-updates.
 
 ## Contributing
