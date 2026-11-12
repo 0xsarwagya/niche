@@ -1,0 +1,14 @@
+[
+  {
+    "id": "openweathermap",
+    "name": "OpenWeatherMap",
+    "url": "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric",
+    "keyParam": "appid",
+    "keyHeader": null,
+    "map": {
+      "temperature": "main.temp",
+      "condition": "weather.0.id",
+      "observedAt": null
+    }
+  }
+]

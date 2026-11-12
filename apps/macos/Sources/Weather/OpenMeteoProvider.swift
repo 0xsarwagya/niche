@@ -40,6 +40,10 @@ struct OpenMeteoProvider: WeatherProvider {
 enum WeatherError: Error, Equatable {
     case invalidResponse
     case http(status: Int)
+    case invalidURL
+    case insecureURL
+    case responseTooLarge
+    case mappingFailed
 }
 
 private extension OpenMeteoProvider {

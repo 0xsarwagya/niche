@@ -64,8 +64,30 @@ a declarative adapter config:
 - how to **map response fields** onto Niche's weather model.
 
 API keys are stored in the macOS Keychain and never written to logs. Imported or
-shared adapter configs are treated as untrusted: Niche shows you the resolved URL
-and exactly where the key will be sent **before** you enable the adapter.
+shared adapter configs are treated as untrusted: adapters must be **https** (non-local
+host), responses are size-capped and time-limited, and the key is sent only to the
+adapter's own host. A malformed adapter is dropped, falling back to Open-Meteo.
+
+Drop adapters in `~/Library/Application Support/Niche/weather-providers.json`
+(see [`apps/macos/Examples/weather-providers.sample.json`](apps/macos/Examples/weather-providers.sample.json)),
+then pick one from the menu bar's **Weather Source** submenu — Niche asks for the key
+there and stores it in the Keychain (never in the JSON). The format:
+
+```json
+[
+  {
+    "id": "openweathermap",
+    "name": "OpenWeatherMap",
+    "url": "https://api.example.com/now?lat={lat}&lon={lon}&units=metric",
+    "keyParam": "appid",
+    "keyHeader": null,
+    "map": { "temperature": "main.temp", "condition": "weather.0.id", "observedAt": null }
+  }
+]
+```
+
+`{lat}`/`{lon}` are substituted per request; the key goes in `keyParam` (query) or
+`keyHeader` (header); `map` holds dot-paths (array indices allowed) into the response.
 
 ## Architecture
 

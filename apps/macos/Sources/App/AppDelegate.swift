@@ -9,7 +9,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         controller: MediaRemoteController(),
         artworkSource: MediaRemoteArtworkSource()
     )
-    private let weather = WeatherModel(provider: OpenMeteoProvider(), location: LocationProvider())
+    private let weather = WeatherModel(defaultProvider: OpenMeteoProvider(), location: LocationProvider())
+    private let configuredProviders = WeatherProviderStore.load()
     private var panel: NotchPanel?
     private var statusItem: NSStatusItem?
 
@@ -56,6 +57,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         weatherItem.target = self
         menu.addItem(weatherItem)
 
+        let sourceMenu = NSMenu()
+        let defaultItem = NSMenuItem(title: "Open-Meteo (default)", action: #selector(selectProvider(_:)), keyEquivalent: "")
+        defaultItem.target = self
+        defaultItem.tag = 0
+        sourceMenu.addItem(defaultItem)
+        for (index, provider) in configuredProviders.enumerated() {
+            let entry = NSMenuItem(title: provider.name, action: #selector(selectProvider(_:)), keyEquivalent: "")
+            entry.target = self
+            entry.tag = index + 1
+            sourceMenu.addItem(entry)
+        }
+        let sourceItem = NSMenuItem(title: "Weather Source", action: nil, keyEquivalent: "")
+        sourceItem.submenu = sourceMenu
+        menu.addItem(sourceItem)
+
         menu.addItem(.separator())
 
         let loginItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLogin(_:)), keyEquivalent: "")
@@ -77,8 +93,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         weather.enable()
     }
 
+    @objc private func selectProvider(_ sender: NSMenuItem) {
+        guard sender.tag > 0 else {
+            weather.setProvider(OpenMeteoProvider())
+            return
+        }
+        let provider = configuredProviders[sender.tag - 1]
+        if provider.needsKey, Keychain.key(for: provider.id) == nil {
+            guard let key = promptForKey(provider) else { return }
+            Keychain.setKey(key, for: provider.id)
+        }
+        weather.setProvider(provider)
+    }
+
     @objc private func toggleLogin(_ sender: NSMenuItem) {
         LoginItem.toggle()
         sender.state = LoginItem.isEnabled ? .on : .off
+    }
+
+    private func promptForKey(_ provider: DeclarativeWeatherProvider) -> String? {
+        let alert = NSAlert()
+        alert.messageText = "API key for \(provider.name)"
+        alert.informativeText = "Stored in your Keychain and sent only to this provider."
+        let field = NSSecureTextField(frame: NSRect(x: 0, y: 0, width: 240, height: 24))
+        alert.accessoryView = field
+        alert.addButton(withTitle: "Save")
+        alert.addButton(withTitle: "Cancel")
+        NSApp.activate(ignoringOtherApps: true)
+        guard alert.runModal() == .alertFirstButtonReturn, !field.stringValue.isEmpty else { return nil }
+        return field.stringValue
     }
 }
