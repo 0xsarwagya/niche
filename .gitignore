@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+
+# Xcode / Swift (generated project is checked out from project.yml)
+*.xcodeproj
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+xcuserdata/
+DerivedData/
+build/
+*.xcuserstate
+.swiftpm/
+
+# XcodeGen generates the app's Info.plist from project.yml
+apps/macos/Info.plist
+
+# Node / Astro
+node_modules/
+dist/
+.astro/
+*.log
+.env
+.env.*
+!.env.example
