@@ -1,10 +1,11 @@
 import AppKit
 import os
 
-/// Creates the notch panel on launch and owns it for the app's lifetime.
+/// Creates the notch panel on launch and feeds it now-playing state.
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private static let logger = Logger(subsystem: "com.niche.app", category: "AppDelegate")
+    private let nowPlaying = NowPlayingModel()
     private var panel: NotchPanel?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -12,9 +13,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             Self.logger.error("No main screen; cannot place the notch panel")
             return
         }
-        let panel = NotchPanel(screen: screen)
+        nowPlaying.start(source: MediaRemoteNowPlayingSource())
+        let panel = NotchPanel(screen: screen, model: nowPlaying)
         panel.orderFrontRegardless()
         self.panel = panel
         Self.logger.info("Niche launched")
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        nowPlaying.stop()
     }
 }

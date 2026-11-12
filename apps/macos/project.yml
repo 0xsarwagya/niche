@@ -20,6 +20,9 @@ targets:
     platform: macOS
     sources:
       - Sources
+      - path: Vendor/mediaremote-adapter
+        type: folder
+        buildPhase: resources
     info:
       path: Info.plist
       properties:

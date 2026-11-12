@@ -6,7 +6,7 @@ import os
 final class NotchPanel: NSPanel {
     private static let logger = Logger(subsystem: "com.niche.app", category: "NotchPanel")
 
-    init(screen: NSScreen) {
+    init(screen: NSScreen, model: NowPlayingModel) {
         let frame = NotchGeometry.panelFrame(in: screen.frame)
         super.init(
             contentRect: frame,
@@ -22,8 +22,9 @@ final class NotchPanel: NSPanel {
         hasShadow = false
         isMovable = false
         hidesOnDeactivate = false
+        ignoresMouseEvents = true
 
-        let hosting = NSHostingView(rootView: NotchView())
+        let hosting = NSHostingView(rootView: NotchRoot(model: model))
         hosting.sizingOptions = []
         hosting.autoresizingMask = [.width, .height]
         contentView = hosting
