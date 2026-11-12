@@ -38,7 +38,7 @@ final class NotchPanel: NSPanel {
     private static let logger = Logger(subsystem: "com.niche.app", category: "NotchPanel")
 
     init(screen: NSScreen, model: NowPlayingModel) {
-        let frame = NotchGeometry.panelFrame(in: screen.frame)
+        let frame = NotchGeometry.panelFrame(in: screen.frame, topInset: screen.safeAreaInsets.top)
         super.init(
             contentRect: frame,
             styleMask: [.borderless, .nonactivatingPanel],

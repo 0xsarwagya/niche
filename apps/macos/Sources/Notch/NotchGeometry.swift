@@ -5,10 +5,12 @@ import CoreGraphics
 enum NotchGeometry {
     static let defaultSize = CGSize(width: 420, height: 90)
 
-    /// Frame centered horizontally against the top edge of `screen`, in screen coordinates.
-    static func panelFrame(in screen: CGRect, size: CGSize = defaultSize) -> CGRect {
+    /// Frame centered horizontally and hung from `topInset` below the screen's top edge,
+    /// in screen coordinates. On notched Macs `topInset` is the notch height, so the island
+    /// clears the hardware notch instead of hiding behind it.
+    static func panelFrame(in screen: CGRect, topInset: CGFloat = 0, size: CGSize = defaultSize) -> CGRect {
         let originX = screen.minX + (screen.width - size.width) / 2
-        let originY = screen.maxY - size.height
+        let originY = screen.maxY - topInset - size.height
         return CGRect(x: originX, y: originY, width: size.width, height: size.height)
     }
 
