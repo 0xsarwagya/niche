@@ -11,17 +11,20 @@ struct NotchView: View {
     private var expanded: Bool { track != nil && model.isHovered }
 
     private var islandSize: CGSize {
-        NotchGeometry.islandSize(hasTrack: track != nil, hovered: model.isHovered, notch: notch)
+        NotchGeometry.islandSize(
+            hasTrack: track != nil, hovered: model.isHovered, hud: model.hud != nil, notch: notch
+        )
     }
 
     var body: some View {
         ZStack(alignment: .top) {
             Color.clear.allowsHitTesting(false)
-            if track != nil {
+            if track != nil || model.hud != nil {
                 island
                     .onHover { model.isHovered = $0 }
                     .animation(.spring(duration: 0.4, bounce: 0.2), value: expanded)
                     .animation(.spring(duration: 0.4, bounce: 0.2), value: track)
+                    .animation(.spring(duration: 0.4, bounce: 0.2), value: model.hud)
             }
         }
     }
@@ -36,7 +39,13 @@ struct NotchView: View {
 
     @ViewBuilder
     private var content: some View {
-        if let track {
+        if let hud = model.hud {
+            hudContent(hud)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
+                .frame(height: islandSize.height - notch.height)
+                .padding(.top, notch.height)
+        } else if let track {
             VStack(spacing: 8) {
                 trackRow(track)
                 if expanded, track.duration > 0 {
@@ -98,6 +107,30 @@ struct NotchView: View {
             ControlButton(symbol: "backward.fill") { model.previousTrack() }
             ControlButton(symbol: track.isPlaying ? "pause.fill" : "play.fill") { model.togglePlayPause() }
             ControlButton(symbol: "forward.fill") { model.nextTrack() }
+        }
+    }
+
+    private func hudContent(_ level: SystemLevel) -> some View {
+        HStack(spacing: 11) {
+            Image(systemName: symbol(for: level.kind))
+                .font(.system(size: 14, weight: .semibold))
+                .frame(width: 20)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.white.opacity(0.22)).frame(height: 4)
+                    Capsule().fill(.white).frame(width: geo.size.width * min(max(level.value, 0), 1), height: 4)
+                }
+                .frame(maxHeight: .infinity)
+            }
+            .frame(height: 10)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func symbol(for kind: SystemLevel.Kind) -> String {
+        switch kind {
+        case .volume: "speaker.wave.2.fill"
+        case .brightness: "sun.max.fill"
         }
     }
 }

@@ -24,3 +24,8 @@ protocol MediaController: Sendable {
 protocol ArtworkSource: Sendable {
     func currentArtwork() async -> Data?
 }
+
+/// Emits volume and brightness changes to drive the notch HUD.
+protocol SystemLevelsSource: Sendable {
+    var updates: AsyncStream<SystemLevel> { get }
+}

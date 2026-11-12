@@ -10,6 +10,7 @@ final class NowPlayingModel {
     private(set) var current: NowPlaying?
     private(set) var artwork: NSImage?
     private(set) var displayElapsed: TimeInterval = 0
+    private(set) var hud: SystemLevel?
     var isHovered = false
 
     private let controller: any MediaController
@@ -17,6 +18,8 @@ final class NowPlayingModel {
     private var streamTask: Task<Void, Never>?
     private var artworkTask: Task<Void, Never>?
     private var tickerTask: Task<Void, Never>?
+    private var levelsTask: Task<Void, Never>?
+    private var hudTask: Task<Void, Never>?
 
     init(controller: any MediaController, artworkSource: any ArtworkSource) {
         self.controller = controller
@@ -34,6 +37,16 @@ final class NowPlayingModel {
         startTicker()
     }
 
+    func observeLevels(_ source: some SystemLevelsSource) {
+        levelsTask?.cancel()
+        levelsTask = Task { [weak self] in
+            for await level in source.updates {
+                guard let self else { break }
+                self.presentHUD(level)
+            }
+        }
+    }
+
     func stop() {
         streamTask?.cancel()
         streamTask = nil
@@ -41,6 +54,20 @@ final class NowPlayingModel {
         artworkTask = nil
         tickerTask?.cancel()
         tickerTask = nil
+        levelsTask?.cancel()
+        levelsTask = nil
+        hudTask?.cancel()
+        hudTask = nil
+    }
+
+    private func presentHUD(_ level: SystemLevel) {
+        hud = level
+        hudTask?.cancel()
+        hudTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(1400))
+            guard let self else { return }
+            self.hud = nil
+        }
     }
 
     func togglePlayPause() { Task { await controller.togglePlayPause() } }

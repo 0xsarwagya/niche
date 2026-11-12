@@ -14,7 +14,8 @@ enum NotchGeometry {
 
     /// Island size for the current state, including the notch footprint at the top.
     /// The single source of truth for the SwiftUI frame and the panel's hit region.
-    static func islandSize(hasTrack: Bool, hovered: Bool, notch: NotchMetrics) -> CGSize {
+    static func islandSize(hasTrack: Bool, hovered: Bool, hud: Bool, notch: NotchMetrics) -> CGSize {
+        if hud { return CGSize(width: max(300, notch.width + 100), height: notch.height + 42) }
         guard hasTrack else { return CGSize(width: notch.width, height: notch.height) }
         let width: CGFloat = hovered ? max(384, notch.width + 190) : max(300, notch.width + 100)
         let contentHeight: CGFloat = hovered ? 82 : 48
