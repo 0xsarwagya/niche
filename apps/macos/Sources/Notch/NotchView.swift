@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The notch surface: one broad black notch — a flat-top, rounded-bottom bar as wide as
 /// the content, anchored at the screen top so the physical notch sits embedded in its
-/// centre. Now-playing hangs in the area below the notch; hover reveals transport controls.
+/// centre. Now-playing hangs below the notch; hover reveals transport controls and a scrubber.
 struct NotchView: View {
     let model: NowPlayingModel
     let notch: NotchMetrics
@@ -37,11 +37,17 @@ struct NotchView: View {
     @ViewBuilder
     private var content: some View {
         if let track {
-            trackRow(track)
-                .foregroundStyle(.white)
-                .padding(.horizontal, 14)
-                .frame(height: islandSize.height - notch.height)
-                .padding(.top, notch.height)
+            VStack(spacing: 8) {
+                trackRow(track)
+                if expanded, track.duration > 0 {
+                    Scrubber(elapsed: model.displayElapsed, duration: track.duration) { model.seek(to: $0) }
+                        .transition(.opacity)
+                }
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .frame(height: islandSize.height - notch.height)
+            .padding(.top, notch.height)
         }
     }
 
@@ -110,6 +116,39 @@ private struct ControlButton: View {
         .buttonStyle(.plain)
         .foregroundStyle(.white)
     }
+}
+
+/// A thin draggable progress bar; reports the sought time on release.
+private struct Scrubber: View {
+    let elapsed: TimeInterval
+    let duration: TimeInterval
+    let onSeek: (TimeInterval) -> Void
+
+    @State private var dragFraction: Double?
+
+    var body: some View {
+        GeometryReader { geo in
+            let fraction = dragFraction ?? (duration > 0 ? clamp(elapsed / duration) : 0)
+            ZStack(alignment: .leading) {
+                Capsule().fill(.white.opacity(0.22)).frame(height: 3)
+                Capsule().fill(.white).frame(width: geo.size.width * fraction, height: 3)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { dragFraction = clamp($0.location.x / geo.size.width) }
+                    .onEnded { value in
+                        let target = clamp(value.location.x / geo.size.width)
+                        dragFraction = nil
+                        onSeek(target * duration)
+                    }
+            )
+        }
+        .frame(height: 14)
+    }
+
+    private func clamp(_ value: Double) -> Double { min(max(value, 0), 1) }
 }
 
 /// Three lime bars that bounce while audio is playing.

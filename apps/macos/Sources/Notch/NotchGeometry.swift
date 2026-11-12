@@ -17,7 +17,7 @@ enum NotchGeometry {
     static func islandSize(hasTrack: Bool, hovered: Bool, notch: NotchMetrics) -> CGSize {
         guard hasTrack else { return CGSize(width: notch.width, height: notch.height) }
         let width: CGFloat = hovered ? max(384, notch.width + 190) : max(300, notch.width + 100)
-        let contentHeight: CGFloat = hovered ? 64 : 48
+        let contentHeight: CGFloat = hovered ? 82 : 48
         return CGSize(width: width, height: notch.height + contentHeight)
     }
 }
