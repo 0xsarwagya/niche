@@ -23,11 +23,11 @@ struct NotchView: View {
     }
 
     private var island: some View {
-        UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20, style: .continuous)
+        NotchShape()
             .fill(.black)
             .frame(width: islandSize.width, height: islandSize.height)
             .overlay(alignment: .leading) { content }
-            .shadow(color: .black.opacity(0.5), radius: 10, y: 3)
+            .shadow(color: .black.opacity(0.45), radius: 9, y: 4)
     }
 
     @ViewBuilder
