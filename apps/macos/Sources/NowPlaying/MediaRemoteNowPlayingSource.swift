@@ -9,7 +9,7 @@ struct MediaRemoteNowPlayingSource: NowPlayingSource {
 
     var updates: AsyncStream<NowPlaying?> {
         AsyncStream { continuation in
-            guard let adapter = Self.bundledAdapter() else {
+            guard let adapter = MediaRemoteAdapter.paths() else {
                 Self.logger.error("mediaremote-adapter missing from the app bundle")
                 continuation.finish()
                 return
@@ -48,17 +48,6 @@ struct MediaRemoteNowPlayingSource: NowPlayingSource {
                 continuation.finish()
             }
         }
-    }
-
-    static func bundledAdapter() -> (script: URL, framework: URL)? {
-        guard let resources = Bundle.main.resourceURL else { return nil }
-        let base = resources.appending(path: "mediaremote-adapter")
-        let script = base.appending(path: "mediaremote-adapter.pl")
-        let framework = base.appending(path: "MediaRemoteAdapter.framework")
-        let fileManager = FileManager.default
-        guard fileManager.fileExists(atPath: script.path),
-              fileManager.fileExists(atPath: framework.path) else { return nil }
-        return (script, framework)
     }
 
     static func nowPlaying(fromStreamLine line: String) -> NowPlaying? {

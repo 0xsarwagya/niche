@@ -11,3 +11,10 @@ protocol NowPlayingSource: Sendable {
 protocol WeatherProvider: Sendable {
     func current(latitude: Double, longitude: Double) async throws -> WeatherSnapshot
 }
+
+/// Controls playback on the now-playing application.
+protocol MediaController: Sendable {
+    func togglePlayPause() async
+    func nextTrack() async
+    func previousTrack() async
+}
