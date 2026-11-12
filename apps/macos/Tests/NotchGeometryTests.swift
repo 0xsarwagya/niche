@@ -14,11 +14,19 @@ struct NotchGeometryTests {
         #expect(size == CGSize(width: 200, height: 32))
     }
 
-    @Test func hudWinsOverTimerAndTrack() {
-        #expect(NotchGeometry.content(hasTrack: true, hud: true, timer: true) == .hud)
+    @Test func hudWinsOverEverything() {
+        #expect(NotchGeometry.content(hasTrack: true, hud: true, timer: true, weather: true) == .hud)
     }
 
     @Test func timerWinsOverTrack() {
-        #expect(NotchGeometry.content(hasTrack: true, hud: false, timer: true) == .timer)
+        #expect(NotchGeometry.content(hasTrack: true, hud: false, timer: true, weather: false) == .timer)
+    }
+
+    @Test func weatherShowsOnlyWhenIdle() {
+        #expect(NotchGeometry.content(hasTrack: false, hud: false, timer: false, weather: true) == .weather)
+    }
+
+    @Test func trackWinsOverWeather() {
+        #expect(NotchGeometry.content(hasTrack: true, hud: false, timer: false, weather: true) == .nowPlaying)
     }
 }

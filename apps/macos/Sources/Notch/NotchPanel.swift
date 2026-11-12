@@ -6,16 +6,18 @@ import os
 /// clear margins of the panel stay click-through.
 private final class PassthroughHostingView: NSHostingView<NotchView> {
     private let model: NowPlayingModel
+    private let weather: WeatherModel
     private let notch: NotchMetrics
 
-    init(model: NowPlayingModel, notch: NotchMetrics) {
+    init(model: NowPlayingModel, weather: WeatherModel, notch: NotchMetrics) {
         self.model = model
+        self.weather = weather
         self.notch = notch
-        super.init(rootView: NotchView(model: model, notch: notch))
+        super.init(rootView: NotchView(model: model, weather: weather, notch: notch))
     }
 
     @MainActor required init(rootView: NotchView) {
-        fatalError("use init(model:notch:)")
+        fatalError("use init(model:weather:notch:)")
     }
 
     required init?(coder: NSCoder) {
@@ -25,7 +27,10 @@ private final class PassthroughHostingView: NSHostingView<NotchView> {
     override func hitTest(_ point: NSPoint) -> NSView? {
         let local = convert(point, from: superview)
         let content = NotchGeometry.content(
-            hasTrack: model.current != nil, hud: model.hud != nil, timer: model.timerRemaining != nil
+            hasTrack: model.current != nil,
+            hud: model.hud != nil,
+            timer: model.timerRemaining != nil,
+            weather: model.isHovered && weather.snapshot != nil
         )
         let size = NotchGeometry.islandSize(content: content, hovered: model.isHovered, notch: notch)
         let islandRect = CGRect(
@@ -42,7 +47,7 @@ private final class PassthroughHostingView: NSHostingView<NotchView> {
 final class NotchPanel: NSPanel {
     private static let logger = Logger(subsystem: "com.niche.app", category: "NotchPanel")
 
-    init(screen: NSScreen, model: NowPlayingModel) {
+    init(screen: NSScreen, model: NowPlayingModel, weather: WeatherModel) {
         let notch = NotchMetrics(screen: screen)
         let frame = NotchGeometry.panelFrame(in: screen.frame)
         super.init(
@@ -60,7 +65,7 @@ final class NotchPanel: NSPanel {
         isMovable = false
         hidesOnDeactivate = false
 
-        let hosting = PassthroughHostingView(model: model, notch: notch)
+        let hosting = PassthroughHostingView(model: model, weather: weather, notch: notch)
         hosting.sizingOptions = []
         hosting.autoresizingMask = [.width, .height]
         contentView = hosting

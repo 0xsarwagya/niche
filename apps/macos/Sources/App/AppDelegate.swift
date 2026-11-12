@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         controller: MediaRemoteController(),
         artworkSource: MediaRemoteArtworkSource()
     )
+    private let weather = WeatherModel(provider: OpenMeteoProvider(), location: LocationProvider())
     private var panel: NotchPanel?
     private var statusItem: NSStatusItem?
 
@@ -20,7 +21,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         nowPlaying.start(source: MediaRemoteNowPlayingSource())
         nowPlaying.observeLevels(SystemLevelsPoller())
         nowPlaying.observeLevels(BatteryMonitor())
-        let panel = NotchPanel(screen: screen, model: nowPlaying)
+        let panel = NotchPanel(screen: screen, model: nowPlaying, weather: weather)
         panel.orderFrontRegardless()
         self.panel = panel
         setUpMenuBar()
@@ -29,6 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         nowPlaying.stop()
+        weather.stop()
     }
 
     private func setUpMenuBar() {
@@ -38,6 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         item.button?.image = image
 
         let menu = NSMenu()
+
         let timerMenu = NSMenu()
         for minutes in [1, 5, 10, 25] {
             let entry = NSMenuItem(title: "\(minutes) min", action: #selector(startTimer(_:)), keyEquivalent: "")
@@ -48,6 +51,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let timerItem = NSMenuItem(title: "Start Timer", action: nil, keyEquivalent: "")
         timerItem.submenu = timerMenu
         menu.addItem(timerItem)
+
+        let weatherItem = NSMenuItem(title: "Enable Weather", action: #selector(enableWeather), keyEquivalent: "")
+        weatherItem.target = self
+        menu.addItem(weatherItem)
+
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit Niche", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         item.menu = menu
@@ -56,5 +64,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func startTimer(_ sender: NSMenuItem) {
         nowPlaying.startTimer(TimeInterval(sender.tag * 60))
+    }
+
+    @objc private func enableWeather() {
+        weather.enable()
     }
 }

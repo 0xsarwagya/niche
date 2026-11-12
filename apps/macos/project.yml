@@ -30,6 +30,7 @@ targets:
         LSUIElement: true
         LSMinimumSystemVersion: "14.0"
         NSHumanReadableCopyright: "© 2026 Niche contributors. MIT licensed."
+        NSLocationWhenInUseUsageDescription: "Niche uses your location to show local weather in the notch."
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.niche.app

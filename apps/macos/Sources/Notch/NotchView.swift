@@ -2,9 +2,11 @@ import SwiftUI
 
 /// The notch surface: one broad black notch anchored at the screen top with the physical
 /// notch embedded in its centre. It shows (in priority) a transient volume/brightness/battery
-/// HUD, a running timer, or now-playing (with hover-reveal controls and a scrubber).
+/// HUD, a running timer, now-playing (hover-reveal controls + scrubber), or — when idle and
+/// hovered — a weather glance. Idle renders a clear, hoverable footprint only.
 struct NotchView: View {
     let model: NowPlayingModel
+    let weather: WeatherModel
     let notch: NotchMetrics
 
     private var track: NowPlaying? { model.current }
@@ -12,7 +14,10 @@ struct NotchView: View {
 
     private var notchContent: NotchGeometry.Content {
         NotchGeometry.content(
-            hasTrack: track != nil, hud: model.hud != nil, timer: model.timerRemaining != nil
+            hasTrack: track != nil,
+            hud: model.hud != nil,
+            timer: model.timerRemaining != nil,
+            weather: model.isHovered && weather.snapshot != nil
         )
     }
 
@@ -23,23 +28,29 @@ struct NotchView: View {
     var body: some View {
         ZStack(alignment: .top) {
             Color.clear.allowsHitTesting(false)
-            if notchContent != .hidden {
-                island
-                    .onHover { model.isHovered = $0 }
-                    .animation(.spring(duration: 0.4, bounce: 0.2), value: expanded)
-                    .animation(.spring(duration: 0.4, bounce: 0.2), value: track)
-                    .animation(.spring(duration: 0.4, bounce: 0.2), value: model.hud)
-                    .animation(.spring(duration: 0.4, bounce: 0.2), value: model.timerRemaining != nil)
-            }
+            island
+                .onHover { model.isHovered = $0 }
+                .animation(.spring(duration: 0.4, bounce: 0.2), value: expanded)
+                .animation(.spring(duration: 0.4, bounce: 0.2), value: track)
+                .animation(.spring(duration: 0.4, bounce: 0.2), value: model.hud)
+                .animation(.spring(duration: 0.4, bounce: 0.2), value: model.timerRemaining != nil)
+                .animation(.spring(duration: 0.4, bounce: 0.2), value: notchContent == .weather)
         }
     }
 
+    @ViewBuilder
     private var island: some View {
-        UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20, style: .continuous)
-            .fill(.black)
-            .frame(width: islandSize.width, height: islandSize.height)
-            .overlay(alignment: .top) { content }
-            .shadow(color: .black.opacity(0.35), radius: 7, y: 3)
+        if notchContent == .hidden {
+            Color.clear
+                .frame(width: notch.width, height: notch.height)
+                .contentShape(Rectangle())
+        } else {
+            UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20, style: .continuous)
+                .fill(.black)
+                .frame(width: islandSize.width, height: islandSize.height)
+                .overlay(alignment: .top) { content }
+                .shadow(color: .black.opacity(0.35), radius: 7, y: 3)
+        }
     }
 
     @ViewBuilder
@@ -54,6 +65,8 @@ struct NotchView: View {
                 if let remaining = model.timerRemaining { timerRow(remaining) }
             case .nowPlaying:
                 if let track { nowPlayingBody(track) }
+            case .weather:
+                if let snapshot = weather.snapshot { weatherRow(snapshot) }
             }
         }
         .foregroundStyle(.white)
@@ -124,7 +137,7 @@ struct NotchView: View {
         }
     }
 
-    // MARK: HUD and timer
+    // MARK: HUD, timer, weather
 
     private func levelRow(symbol: String, fraction: Double) -> some View {
         HStack(spacing: 11) {
@@ -155,6 +168,18 @@ struct NotchView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private func weatherRow(_ snapshot: WeatherSnapshot) -> some View {
+        HStack(spacing: 11) {
+            Image(systemName: NotchView.weatherSymbol(snapshot.conditionCode))
+                .font(.system(size: 15, weight: .semibold))
+                .frame(width: 22)
+            Text("\(Int(snapshot.temperatureCelsius.rounded()))°")
+                .font(.system(size: 16, weight: .semibold))
+            Spacer(minLength: 6)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private func symbol(for level: SystemLevel) -> String {
         switch level.kind {
         case .volume: "speaker.wave.2.fill"
@@ -166,6 +191,20 @@ struct NotchView: View {
     static func format(_ remaining: TimeInterval) -> String {
         let seconds = max(0, Int(remaining.rounded()))
         return String(format: "%d:%02d", seconds / 60, seconds % 60)
+    }
+
+    /// Maps a WMO weather code to an SF Symbol.
+    static func weatherSymbol(_ code: Int) -> String {
+        switch code {
+        case 0: "sun.max.fill"
+        case 1...3: "cloud.sun.fill"
+        case 45...48: "cloud.fog.fill"
+        case 51...67: "cloud.rain.fill"
+        case 71...77: "cloud.snow.fill"
+        case 80...82: "cloud.heavy.rain.fill"
+        case 95...99: "cloud.bolt.fill"
+        default: "cloud.fill"
+        }
     }
 }
 

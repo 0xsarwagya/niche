@@ -9,6 +9,7 @@ enum NotchGeometry {
         case hud
         case timer
         case nowPlaying
+        case weather
     }
 
     static let stageSize = CGSize(width: 440, height: 150)
@@ -20,10 +21,11 @@ enum NotchGeometry {
     }
 
     /// Resolves what the island shows; a transient HUD wins, then a running timer, then media.
-    static func content(hasTrack: Bool, hud: Bool, timer: Bool) -> Content {
+    static func content(hasTrack: Bool, hud: Bool, timer: Bool, weather: Bool) -> Content {
         if hud { return .hud }
         if timer { return .timer }
         if hasTrack { return .nowPlaying }
+        if weather { return .weather }
         return .hidden
     }
 
@@ -33,7 +35,7 @@ enum NotchGeometry {
         switch content {
         case .hidden:
             return CGSize(width: notch.width, height: notch.height)
-        case .hud, .timer:
+        case .hud, .timer, .weather:
             return CGSize(width: max(300, notch.width + 100), height: notch.height + 44)
         case .nowPlaying:
             let width: CGFloat = hovered ? max(384, notch.width + 190) : max(300, notch.width + 100)

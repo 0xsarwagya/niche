@@ -125,7 +125,7 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 - Volume & brightness HUD at the notch.
 - Battery HUD: charging plug-in/unplug and low-battery alerts.
 - Countdown timers, started from a menu bar item (which also has Quit).
-- Weather seam with the keyless `OpenMeteoProvider`.
+- Weather glance on hovering the idle notch (opt-in location; keyless Open-Meteo).
 
 **Planned**
 
