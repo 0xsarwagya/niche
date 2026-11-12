@@ -123,6 +123,7 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 - Now playing: live track, artist, album artwork, and a draggable scrubber, with
   hover-to-reveal play / pause / skip controls, via the vendored `ungive/mediaremote-adapter`.
 - Volume & brightness HUD at the notch.
+- Battery HUD: charging plug-in/unplug and low-battery alerts.
 - Weather seam with the keyless `OpenMeteoProvider`.
 
 **Planned**

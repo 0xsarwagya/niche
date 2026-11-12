@@ -18,7 +18,7 @@ final class NowPlayingModel {
     private var streamTask: Task<Void, Never>?
     private var artworkTask: Task<Void, Never>?
     private var tickerTask: Task<Void, Never>?
-    private var levelsTask: Task<Void, Never>?
+    private var levelsTasks: [Task<Void, Never>] = []
     private var hudTask: Task<Void, Never>?
 
     init(controller: any MediaController, artworkSource: any ArtworkSource) {
@@ -38,13 +38,13 @@ final class NowPlayingModel {
     }
 
     func observeLevels(_ source: some SystemLevelsSource) {
-        levelsTask?.cancel()
-        levelsTask = Task { [weak self] in
+        let task = Task { [weak self] in
             for await level in source.updates {
                 guard let self else { break }
                 self.presentHUD(level)
             }
         }
+        levelsTasks.append(task)
     }
 
     func stop() {
@@ -54,8 +54,8 @@ final class NowPlayingModel {
         artworkTask = nil
         tickerTask?.cancel()
         tickerTask = nil
-        levelsTask?.cancel()
-        levelsTask = nil
+        levelsTasks.forEach { $0.cancel() }
+        levelsTasks.removeAll()
         hudTask?.cancel()
         hudTask = nil
     }

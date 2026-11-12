@@ -18,6 +18,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         nowPlaying.start(source: MediaRemoteNowPlayingSource())
         nowPlaying.observeLevels(SystemLevelsPoller())
+        nowPlaying.observeLevels(BatteryMonitor())
         let panel = NotchPanel(screen: screen, model: nowPlaying)
         panel.orderFrontRegardless()
         self.panel = panel

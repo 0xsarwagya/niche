@@ -112,7 +112,7 @@ struct NotchView: View {
 
     private func hudContent(_ level: SystemLevel) -> some View {
         HStack(spacing: 11) {
-            Image(systemName: symbol(for: level.kind))
+            Image(systemName: symbol(for: level))
                 .font(.system(size: 14, weight: .semibold))
                 .frame(width: 20)
             GeometryReader { geo in
@@ -127,10 +127,11 @@ struct NotchView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func symbol(for kind: SystemLevel.Kind) -> String {
-        switch kind {
+    private func symbol(for level: SystemLevel) -> String {
+        switch level.kind {
         case .volume: "speaker.wave.2.fill"
         case .brightness: "sun.max.fill"
+        case .battery: level.charging ? "bolt.fill" : "battery.100"
         }
     }
 }

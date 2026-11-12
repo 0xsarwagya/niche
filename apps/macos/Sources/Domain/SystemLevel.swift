@@ -5,8 +5,10 @@ struct SystemLevel: Equatable, Sendable {
     enum Kind: Equatable, Sendable {
         case volume
         case brightness
+        case battery
     }
 
     let kind: Kind
     let value: Double
+    var charging: Bool = false
 }
