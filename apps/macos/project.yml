@@ -41,3 +41,4 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.niche.tests
+        GENERATE_INFOPLIST_FILE: YES
