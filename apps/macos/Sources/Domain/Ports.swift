@@ -17,4 +17,10 @@ protocol MediaController: Sendable {
     func togglePlayPause() async
     func nextTrack() async
     func previousTrack() async
+    func seek(toMicros micros: Int) async
+}
+
+/// One-shot source of the current track's artwork bytes, source-agnostic.
+protocol ArtworkSource: Sendable {
+    func currentArtwork() async -> Data?
 }

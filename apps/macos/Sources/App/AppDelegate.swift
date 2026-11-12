@@ -5,7 +5,10 @@ import os
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private static let logger = Logger(subsystem: "com.niche.app", category: "AppDelegate")
-    private let nowPlaying = NowPlayingModel(controller: MediaRemoteController())
+    private let nowPlaying = NowPlayingModel(
+        controller: MediaRemoteController(),
+        artworkSource: MediaRemoteArtworkSource()
+    )
     private var panel: NotchPanel?
 
     func applicationDidFinishLaunching(_ notification: Notification) {

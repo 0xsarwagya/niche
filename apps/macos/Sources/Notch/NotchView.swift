@@ -70,15 +70,21 @@ struct NotchView: View {
     }
 
     private var artwork: some View {
-        RoundedRectangle(cornerRadius: 8, style: .continuous)
-            .fill(LinearGradient(
-                colors: [
-                    Color(red: 1, green: 0.6, blue: 0.42),
-                    Color(red: 1, green: 0.37, blue: 0.54),
-                    Color(red: 0.55, green: 0.42, blue: 1),
-                ],
-                startPoint: .topLeading, endPoint: .bottomTrailing))
-            .frame(width: 30, height: 30)
+        Group {
+            if let image = model.artwork {
+                Image(nsImage: image).resizable().scaledToFill()
+            } else {
+                LinearGradient(
+                    colors: [
+                        Color(red: 1, green: 0.6, blue: 0.42),
+                        Color(red: 1, green: 0.37, blue: 0.54),
+                        Color(red: 0.55, green: 0.42, blue: 1),
+                    ],
+                    startPoint: .topLeading, endPoint: .bottomTrailing)
+            }
+        }
+        .frame(width: 30, height: 30)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
     private func transport(_ track: NowPlaying) -> some View {

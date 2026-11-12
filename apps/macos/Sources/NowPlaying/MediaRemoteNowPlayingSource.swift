@@ -60,7 +60,13 @@ struct MediaRemoteNowPlayingSource: NowPlayingSource {
 
     static func nowPlaying(from payload: Payload) -> NowPlaying? {
         guard let title = payload.title, !title.isEmpty else { return nil }
-        return NowPlaying(title: title, artist: payload.artist ?? "", isPlaying: payload.playing ?? false)
+        return NowPlaying(
+            title: title,
+            artist: payload.artist ?? "",
+            isPlaying: payload.playing ?? false,
+            duration: payload.duration ?? 0,
+            elapsed: payload.elapsedTime ?? 0
+        )
     }
 
     struct StreamLine: Decodable {
@@ -71,5 +77,7 @@ struct MediaRemoteNowPlayingSource: NowPlayingSource {
         let title: String?
         let artist: String?
         let playing: Bool?
+        let duration: Double?
+        let elapsedTime: Double?
     }
 }
