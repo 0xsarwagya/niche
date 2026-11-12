@@ -126,6 +126,7 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 - Battery HUD: charging plug-in/unplug and low-battery alerts.
 - Countdown timers, started from a menu bar item (which also has Quit).
 - Weather glance on hovering the idle notch (opt-in location; keyless Open-Meteo).
+- Launch at login, toggled from the menu bar.
 
 **Planned**
 

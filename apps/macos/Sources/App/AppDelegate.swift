@@ -57,6 +57,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(weatherItem)
 
         menu.addItem(.separator())
+
+        let loginItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLogin(_:)), keyEquivalent: "")
+        loginItem.target = self
+        loginItem.state = LoginItem.isEnabled ? .on : .off
+        menu.addItem(loginItem)
+
+        menu.addItem(.separator())
         menu.addItem(withTitle: "Quit Niche", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         item.menu = menu
         statusItem = item
@@ -68,5 +75,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func enableWeather() {
         weather.enable()
+    }
+
+    @objc private func toggleLogin(_ sender: NSMenuItem) {
+        LoginItem.toggle()
+        sender.state = LoginItem.isEnabled ? .on : .off
     }
 }
