@@ -144,7 +144,7 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
   every Space.
 - Now playing: live track, artist, album artwork, and a draggable scrubber, with
   hover-to-reveal play / pause / skip controls, via the vendored `ungive/mediaremote-adapter`.
-- Volume & brightness HUD at the notch.
+- Volume & brightness HUD at the notch, replacing the system OSD (needs Accessibility permission).
 - Battery HUD: charging plug-in/unplug and low-battery alerts.
 - Countdown timers, started from a menu bar item (which also has Quit).
 - Weather glance on hovering the idle notch (opt-in location; keyless Open-Meteo).
@@ -153,8 +153,8 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 
 **Planned**
 
-- Suppress the system volume/brightness OSD; Spaces HUD.
-- AirPods / Bluetooth battery; bring-your-own weather + Keychain; multi-display.
+- Spaces HUD; multi-display.
+- AirPods / Bluetooth battery.
 - Declarative bring-your-own weather providers + Keychain key storage.
 - Sparkle auto-updates.
 

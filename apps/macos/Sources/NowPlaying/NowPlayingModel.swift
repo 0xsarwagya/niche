@@ -67,6 +67,10 @@ final class NowPlayingModel {
         countdownTask = nil
     }
 
+    func showLevel(_ level: SystemLevel) {
+        presentHUD(level)
+    }
+
     private func presentHUD(_ level: SystemLevel) {
         hud = level
         hudTask?.cancel()

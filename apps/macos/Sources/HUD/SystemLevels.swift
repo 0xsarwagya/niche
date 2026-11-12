@@ -44,20 +44,24 @@ enum SystemLevels {
         return abs(current - previous) > epsilon
     }
 
-    static func outputVolume() -> Double? {
+    static func defaultOutputDevice() -> AudioObjectID? {
         var deviceID = AudioObjectID(0)
-        var deviceSize = UInt32(MemoryLayout<AudioObjectID>.size)
-        var deviceAddress = AudioObjectPropertyAddress(
+        var size = UInt32(MemoryLayout<AudioObjectID>.size)
+        var address = AudioObjectPropertyAddress(
             mSelector: kAudioHardwarePropertyDefaultOutputDevice,
             mScope: kAudioObjectPropertyScopeGlobal,
             mElement: kAudioObjectPropertyElementMain
         )
         guard AudioObjectGetPropertyData(
-            AudioObjectID(kAudioObjectSystemObject), &deviceAddress, 0, nil, &deviceSize, &deviceID
+            AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &deviceID
         ) == noErr else {
             return nil
         }
+        return deviceID
+    }
 
+    static func outputVolume() -> Double? {
+        guard let device = defaultOutputDevice() else { return nil }
         var volume = Float32(0)
         var volumeSize = UInt32(MemoryLayout<Float32>.size)
         var volumeAddress = AudioObjectPropertyAddress(
@@ -65,7 +69,7 @@ enum SystemLevels {
             mScope: kAudioDevicePropertyScopeOutput,
             mElement: kAudioObjectPropertyElementMain
         )
-        guard AudioObjectGetPropertyData(deviceID, &volumeAddress, 0, nil, &volumeSize, &volume) == noErr else {
+        guard AudioObjectGetPropertyData(device, &volumeAddress, 0, nil, &volumeSize, &volume) == noErr else {
             return nil
         }
         return Double(volume)
