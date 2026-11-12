@@ -1,0 +1,926 @@
+---
+import Base from '../layouts/Base.astro';
+
+const repo = 'https://github.com/0xsarwagya/niche';
+
+const features = [
+  {
+    title: 'Now playing, at the notch',
+    body: 'Track, artist, and scrubbable progress fold out of the notch the moment music starts — and fold away when it stops.',
+    tag: 'Media',
+  },
+  {
+    title: 'Weather, your way',
+    body: 'Keyless by default via Open-Meteo. Swap in any provider with a small config file; your API key stays in the Keychain.',
+    tag: 'Weather',
+  },
+  {
+    title: 'Volume & brightness HUD',
+    body: 'Replace the blunt system squares with a quiet readout that lives where your eyes already are.',
+    tag: 'HUD',
+  },
+  {
+    title: 'Free & open source',
+    body: 'MIT licensed. No account, no telemetry, no paid Apple certificate. Read every line, build it yourself.',
+    tag: 'Open',
+  },
+];
+---
+
+<Base>
+  <header class="nav">
+    <div class="wrap nav__inner">
+      <a class="brand" href="/" aria-label="Niche home">
+        <span class="brand__mark" aria-hidden="true"></span>
+        Niche
+      </a>
+      <nav class="nav__links">
+        <a href="#features">Features</a>
+        <a href="#weather">Weather</a>
+        <a href="#install">Install</a>
+        <a class="nav__gh" href={repo} target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero__inner">
+        <p class="eyebrow">Free &amp; open source · macOS</p>
+        <h1 class="hero__title">Your notch, finally<br /> doing something.</h1>
+        <p class="hero__sub">
+          Niche turns the dead space around your Mac's notch into a live surface —
+          now playing, weather, and heads-up feedback. No subscription, no account,
+          no paid Apple certificate.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="#install">Download for macOS</a>
+          <a class="btn btn--ghost" href={repo} target="_blank" rel="noopener">Star on GitHub ↗</a>
+        </div>
+        <p class="hero__note">Apple silicon &amp; Intel · macOS 14+ · MIT licensed</p>
+      </div>
+
+      <div class="stage">
+        <div class="macbook" data-beat="music" aria-label="A Mac notch showing now playing, then the weather">
+          <div class="screen">
+            <div class="wallpaper-glow" aria-hidden="true"></div>
+            <div class="menubar" aria-hidden="true">
+              <div class="menubar__left">
+                <span class="mb-dot"></span>
+                <span class="mb-strong">Music</span>
+                <span class="mb-item">File</span>
+                <span class="mb-item">Edit</span>
+                <span class="mb-item">View</span>
+              </div>
+              <div class="menubar__right">
+                <svg viewBox="0 0 20 16" width="18" height="14" fill="currentColor" aria-hidden="true"><path d="M10 3.2c2.5 0 4.8 1 6.5 2.6l-1.3 1.4A7.6 7.6 0 0 0 10 5.2 7.6 7.6 0 0 0 4.8 7.2L3.5 5.8A9.6 9.6 0 0 1 10 3.2Zm0 3.6c1.5 0 2.9.6 3.9 1.6l-1.4 1.4A3.6 3.6 0 0 0 10 8.8c-1 0-1.9.4-2.5 1l-1.4-1.4A5.6 5.6 0 0 1 10 6.8Zm0 3.6c.6 0 1.1.2 1.5.6L10 12.1l-1.5-1.5c.4-.4.9-.6 1.5-.6Z"/></svg>
+                <svg viewBox="0 0 28 14" width="24" height="12" aria-hidden="true"><rect x="1" y="2.5" width="22" height="9" rx="2.5" fill="none" stroke="currentColor" stroke-opacity="0.6"/><rect x="3" y="4.5" width="16" height="5" rx="1" fill="currentColor"/><rect x="24.5" y="5" width="2" height="4" rx="1" fill="currentColor" fill-opacity="0.6"/></svg>
+                <span class="mb-clock tabnum">9:41</span>
+              </div>
+            </div>
+
+            <div class="notch" data-notch>
+              <span class="notch__idle" aria-hidden="true"></span>
+
+              <div class="np">
+                <div class="np__art" aria-hidden="true"></div>
+                <div class="np__meta">
+                  <div class="np__title">Golden Hour</div>
+                  <div class="np__artist">Elias Vale</div>
+                  <div class="np__progress"><i></i></div>
+                </div>
+                <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+              </div>
+
+              <div class="wx">
+                <div class="wx__icon" aria-hidden="true">
+                  <svg viewBox="0 0 48 48" width="100%" height="100%" fill="none">
+                    <circle cx="19" cy="18" r="8" fill="#ffb55c"/>
+                    <path d="M14 34h18a7 7 0 0 0 .4-14 10 10 0 0 0-19 2A6 6 0 0 0 14 34Z" fill="#dfe7f2"/>
+                  </svg>
+                </div>
+                <div class="wx__meta">
+                  <div class="wx__city">Berlin</div>
+                  <div class="wx__cond">Partly cloudy</div>
+                </div>
+                <div class="wx__temp tabnum">12°</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="wrap">
+        <p class="eyebrow">What it does</p>
+        <h2 class="section__title">A small surface, used well.</h2>
+        <div class="grid">
+          {
+            features.map((f) => (
+              <article class="card">
+                <span class="card__tag">{f.tag}</span>
+                <h3 class="card__title">{f.title}</h3>
+                <p class="card__body">{f.body}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="section byow" id="weather">
+      <div class="wrap byow__inner">
+        <div class="byow__copy">
+          <p class="eyebrow">Bring your own weather</p>
+          <h2 class="section__title">Keyless by default.<br />Any provider you like.</h2>
+          <p class="byow__text">
+            Niche ships with free, keyless weather from Open-Meteo — it just works.
+            Want a different source? Point Niche at a declarative adapter: an endpoint
+            template, where your key goes, and how to read the response.
+          </p>
+          <ul class="byow__list">
+            <li>Keys live in your macOS Keychain, never in logs.</li>
+            <li>Imported configs are untrusted — Niche shows the resolved URL and where the key is sent before you enable it.</li>
+          </ul>
+        </div>
+        <div class="code" role="img" aria-label="Example weather adapter configuration">
+          <div class="code__bar" aria-hidden="true">
+            <span class="code__dot"></span><span class="code__dot"></span><span class="code__dot"></span>
+            <span class="code__name">weather.adapter.json</span>
+          </div>
+          <pre><code><span class="c-p">&#123;</span>
+  <span class="c-k">"name"</span>: <span class="c-s">"My Provider"</span>,
+  <span class="c-k">"url"</span>: <span class="c-s">"https://api.example.com/now?q=&#123;lat&#125;,&#123;lon&#125;"</span>,
+  <span class="c-k">"key"</span>: <span class="c-p">&#123;</span> <span class="c-k">"in"</span>: <span class="c-s">"header"</span>, <span class="c-k">"name"</span>: <span class="c-s">"X-Api-Key"</span> <span class="c-p">&#125;</span>,
+  <span class="c-k">"map"</span>: <span class="c-p">&#123;</span>
+    <span class="c-k">"temperatureCelsius"</span>: <span class="c-s">"current.temp_c"</span>,
+    <span class="c-k">"conditionCode"</span>: <span class="c-s">"current.code"</span>
+  <span class="c-p">&#125;</span>
+<span class="c-p">&#125;</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="section install" id="install">
+      <div class="wrap">
+        <p class="eyebrow">Install</p>
+        <h2 class="section__title">Up in a minute.</h2>
+        <div class="install__grid">
+          <div class="install__card">
+            <h3 class="install__h">Homebrew</h3>
+            <div class="cmd">
+              <code>brew install --cask --no-quarantine 0xsarwagya/tap/niche</code>
+              <button class="cmd__copy" type="button" data-copy="brew install --cask --no-quarantine 0xsarwagya/tap/niche" aria-label="Copy command">Copy</button>
+            </div>
+            <p class="install__p"><code>--no-quarantine</code> skips Gatekeeper, so there's nothing left to approve.</p>
+          </div>
+          <div class="install__card">
+            <h3 class="install__h">Direct download</h3>
+            <a class="btn btn--primary" href={`${repo}/releases`} target="_blank" rel="noopener">Download Niche.app ↗</a>
+            <p class="install__p">
+              <strong>First launch:</strong> Niche is ad-hoc signed, not notarized.
+              Open <strong>System Settings → Privacy &amp; Security</strong>, find the
+              blocked message, and click <strong>Open Anyway</strong>. Once only.
+            </p>
+          </div>
+        </div>
+        <p class="install__why">
+          Why the extra step? Niche is free and doesn't pay for Apple's Developer
+          Program, so there's no notarization — just open-source code you can build yourself.
+        </p>
+      </div>
+    </section>
+
+    <section class="section oss">
+      <div class="wrap oss__inner">
+        <h2 class="oss__title">Free, and it stays free.</h2>
+        <p class="oss__text">MIT licensed. No account. No telemetry. Every line on GitHub.</p>
+        <a class="btn btn--primary btn--lg" href={repo} target="_blank" rel="noopener">View the source ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot__inner">
+      <a class="brand" href="/">
+        <span class="brand__mark" aria-hidden="true"></span>
+        Niche
+      </a>
+      <nav class="foot__links">
+        <a href={repo} target="_blank" rel="noopener">GitHub</a>
+        <a href={`${repo}/blob/main/README.md`} target="_blank" rel="noopener">Docs</a>
+        <a href={`${repo}/blob/main/LICENSE`} target="_blank" rel="noopener">MIT License</a>
+      </nav>
+      <p class="foot__copy">© 2026 Niche contributors</p>
+    </div>
+  </footer>
+
+  <style>
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(14px);
+      background: color-mix(in srgb, var(--bg) 72%, transparent);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav__inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+    }
+    .brand__mark {
+      width: 26px;
+      height: 13px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 45%, transparent);
+    }
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: clamp(14px, 2.4vw, 28px);
+      font-size: 0.95rem;
+      color: var(--text-dim);
+    }
+    .nav__links a {
+      transition: color 160ms var(--ease-out);
+    }
+    .nav__links a:hover {
+      color: var(--text);
+    }
+    .nav__gh {
+      color: var(--text);
+      font-weight: 500;
+    }
+    @media (max-width: 620px) {
+      .nav__links a:not(.nav__gh) {
+        display: none;
+      }
+    }
+
+    .hero {
+      position: relative;
+      padding-top: clamp(48px, 8vw, 96px);
+      overflow: hidden;
+    }
+    .hero__inner {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .hero__title {
+      margin-top: 18px;
+      font-size: clamp(2.6rem, 7vw, 5rem);
+      font-weight: 600;
+    }
+    .hero__sub {
+      margin-top: 22px;
+      max-width: 44ch;
+      font-size: clamp(1.02rem, 1.6vw, 1.22rem);
+      color: var(--text-dim);
+    }
+    .hero__cta {
+      margin-top: 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+    .hero__note {
+      margin-top: 18px;
+      font-size: 0.85rem;
+      color: var(--text-mute);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 48px;
+      padding: 0 22px;
+      border-radius: var(--r-pill);
+      font-weight: 600;
+      font-size: 0.98rem;
+      border: 1px solid transparent;
+      transition:
+        transform 150ms var(--ease-out),
+        background-color 160ms var(--ease-out),
+        border-color 160ms var(--ease-out);
+      will-change: transform;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+    .btn--primary {
+      background: var(--accent);
+      color: var(--accent-ink);
+      box-shadow: 0 6px 24px color-mix(in srgb, var(--accent) 28%, transparent);
+    }
+    .btn--primary:hover {
+      background: color-mix(in srgb, var(--accent) 88%, white);
+    }
+    .btn--ghost {
+      border-color: var(--line-strong);
+      color: var(--text);
+    }
+    .btn--ghost:hover {
+      border-color: var(--text-mute);
+      background: var(--surface);
+    }
+    .btn--lg {
+      height: 54px;
+      padding: 0 30px;
+      font-size: 1.05rem;
+    }
+
+    /* --- Notch stage --- */
+    .stage {
+      margin-top: clamp(44px, 6vw, 80px);
+      display: flex;
+      justify-content: center;
+      padding-bottom: clamp(40px, 7vw, 90px);
+    }
+    .macbook {
+      position: relative;
+      width: min(880px, 94vw);
+      aspect-ratio: 16 / 10;
+      border-radius: clamp(18px, 2.4vw, 30px);
+      background: #0c0c0f;
+      padding: clamp(7px, 1vw, 12px);
+      border: 1px solid var(--line-strong);
+      box-shadow: var(--shadow-lg);
+    }
+    .screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: clamp(12px, 1.8vw, 22px);
+      overflow: hidden;
+      background: radial-gradient(130% 95% at 50% -12%, #2b3350 0%, #161a2c 42%, #0a0b13 78%);
+    }
+    .wallpaper-glow {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(58% 48% at 18% 32%, rgba(200, 247, 81, 0.1), transparent 60%),
+        radial-gradient(52% 44% at 84% 64%, rgba(143, 199, 255, 0.16), transparent 62%),
+        radial-gradient(72% 60% at 50% 122%, rgba(255, 150, 120, 0.14), transparent 60%);
+    }
+    .menubar {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: clamp(26px, 3.3vw, 34px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(12px, 1.6vw, 20px);
+      font-size: clamp(11px, 1.15vw, 13px);
+      color: #fff;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), transparent);
+      z-index: 2;
+    }
+    .menubar__left,
+    .menubar__right {
+      display: flex;
+      align-items: center;
+      gap: clamp(9px, 1.4vw, 16px);
+    }
+    .mb-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+    .mb-strong {
+      font-weight: 600;
+    }
+    .mb-item {
+      color: rgba(255, 255, 255, 0.68);
+    }
+    .menubar__right {
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 5;
+      width: 27%;
+      height: clamp(30px, 3.6vw, 36px);
+      background: #000;
+      border-radius: 0 0 clamp(14px, 1.8vw, 18px) clamp(14px, 1.8vw, 18px);
+      box-shadow:
+        0 3px 14px rgba(0, 0, 0, 0.6),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition:
+        width 0.6s var(--spring),
+        height 0.6s var(--spring),
+        border-radius 0.6s var(--spring);
+    }
+    .macbook[data-beat='music'] .notch,
+    .macbook[data-beat='weather'] .notch {
+      width: min(62%, 440px);
+      height: clamp(104px, 14.5vw, 132px);
+      border-radius: 0 0 clamp(26px, 3.4vw, 36px) clamp(26px, 3.4vw, 36px);
+    }
+
+    .notch__idle {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+      opacity: 0;
+    }
+    .macbook[data-beat='idle'] .notch__idle {
+      opacity: 0.85;
+      animation: pulse 1.9s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,
+      100% {
+        opacity: 0.35;
+      }
+      50% {
+        opacity: 0.95;
+      }
+    }
+
+    .np,
+    .wx {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 1.6vw, 16px);
+      padding: 0 clamp(14px, 2.2vw, 22px);
+      opacity: 0;
+      transform: translateY(8px) scale(0.97);
+      filter: blur(4px);
+      transition:
+        opacity 0.3s var(--ease-out),
+        transform 0.42s var(--ease-out),
+        filter 0.3s var(--ease-out);
+    }
+    .macbook[data-beat='music'] .np,
+    .macbook[data-beat='weather'] .wx {
+      opacity: 1;
+      transform: none;
+      filter: none;
+      transition-delay: 0.16s;
+    }
+
+    .np__art {
+      width: clamp(50px, 7.6vw, 64px);
+      aspect-ratio: 1;
+      flex: none;
+      border-radius: clamp(10px, 1.4vw, 13px);
+      background: linear-gradient(140deg, #ff9a6c, #ff5e8a 46%, #8b6cff);
+      box-shadow: var(--shadow-sm);
+    }
+    .np__meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .np__title {
+      font-weight: 600;
+      font-size: clamp(14px, 1.5vw, 17px);
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .np__artist {
+      font-size: clamp(12px, 1.3vw, 14px);
+      color: var(--text-dim);
+    }
+    .np__progress {
+      margin-top: 10px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      overflow: hidden;
+    }
+    .np__progress > i {
+      display: block;
+      height: 100%;
+      width: 16%;
+      border-radius: 999px;
+      background: var(--accent);
+      transition: width 0.5s var(--ease-out);
+    }
+    .macbook[data-beat='music'] .np__progress > i {
+      width: 68%;
+      transition: width 5s linear 0.25s;
+    }
+
+    .eq {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      height: clamp(26px, 3.4vw, 32px);
+      flex: none;
+    }
+    .eq span {
+      width: 4px;
+      height: 100%;
+      border-radius: 999px;
+      background: var(--accent);
+      transform: scaleY(0.28);
+      transform-origin: bottom;
+      animation: eq 900ms var(--ease-in-out) infinite;
+      animation-play-state: paused;
+    }
+    .eq span:nth-child(2) {
+      animation-duration: 700ms;
+    }
+    .eq span:nth-child(3) {
+      animation-duration: 1060ms;
+    }
+    .eq span:nth-child(4) {
+      animation-duration: 640ms;
+    }
+    .macbook[data-beat='music'] .eq span {
+      animation-play-state: running;
+    }
+    @keyframes eq {
+      0%,
+      100% {
+        transform: scaleY(0.25);
+      }
+      50% {
+        transform: scaleY(1);
+      }
+    }
+
+    .wx__icon {
+      width: clamp(46px, 7vw, 58px);
+      aspect-ratio: 1;
+      flex: none;
+    }
+    .wx__meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .wx__city {
+      font-weight: 600;
+      font-size: clamp(14px, 1.5vw, 17px);
+      color: #fff;
+    }
+    .wx__cond {
+      font-size: clamp(12px, 1.3vw, 14px);
+      color: var(--text-dim);
+    }
+    .wx__temp {
+      font-family: var(--font-display);
+      font-weight: 500;
+      font-size: clamp(26px, 4vw, 38px);
+      color: #fff;
+    }
+
+    /* --- Sections --- */
+    .section {
+      padding-block: clamp(64px, 10vw, 128px);
+    }
+    .section__title {
+      margin-top: 12px;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+    }
+
+    .grid {
+      margin-top: clamp(32px, 5vw, 52px);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: clamp(14px, 1.8vw, 20px);
+    }
+    .card {
+      padding: clamp(22px, 3vw, 30px);
+      border-radius: var(--r-lg);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      transition:
+        transform 200ms var(--ease-out),
+        border-color 200ms var(--ease-out),
+        background-color 200ms var(--ease-out);
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--line-strong);
+      background: var(--surface-2);
+    }
+    .card__tag {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .card__title {
+      margin-top: 14px;
+      font-size: 1.22rem;
+      font-weight: 600;
+    }
+    .card__body {
+      margin-top: 10px;
+      color: var(--text-dim);
+      font-size: 0.98rem;
+    }
+
+    .byow__inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(28px, 5vw, 64px);
+      align-items: center;
+    }
+    @media (max-width: 860px) {
+      .byow__inner {
+        grid-template-columns: 1fr;
+      }
+    }
+    .byow__text {
+      margin-top: 20px;
+      color: var(--text-dim);
+      font-size: 1.05rem;
+    }
+    .byow__list {
+      margin-top: 20px;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+    .byow__list li {
+      position: relative;
+      padding-left: 26px;
+      color: var(--text-dim);
+      font-size: 0.96rem;
+    }
+    .byow__list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      background: var(--accent);
+    }
+
+    .code {
+      border-radius: var(--r-lg);
+      background: var(--bg-raise);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .code__bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+    .code__dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 999px;
+      background: var(--surface-2);
+    }
+    .code__name {
+      margin-left: 8px;
+      font-size: 0.82rem;
+      color: var(--text-mute);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .code pre {
+      margin: 0;
+      padding: clamp(16px, 2.4vw, 24px);
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: clamp(0.78rem, 1.4vw, 0.9rem);
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .c-k {
+      color: var(--cool);
+    }
+    .c-s {
+      color: var(--accent);
+    }
+    .c-p {
+      color: var(--text-mute);
+    }
+
+    .install__grid {
+      margin-top: clamp(32px, 5vw, 48px);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(16px, 2vw, 24px);
+    }
+    @media (max-width: 760px) {
+      .install__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .install__card {
+      padding: clamp(24px, 3vw, 32px);
+      border-radius: var(--r-lg);
+      background: var(--surface);
+      border: 1px solid var(--line);
+    }
+    .install__h {
+      font-size: 1.2rem;
+      margin-bottom: 18px;
+    }
+    .cmd {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 12px 12px 16px;
+      border-radius: var(--r);
+      background: var(--bg);
+      border: 1px solid var(--line);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.82rem;
+    }
+    .cmd code {
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      white-space: nowrap;
+      color: var(--text);
+    }
+    .cmd__copy {
+      flex: none;
+      padding: 7px 12px;
+      border-radius: var(--r-sm);
+      border: 1px solid var(--line-strong);
+      background: var(--surface-2);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition:
+        transform 150ms var(--ease-out),
+        background-color 150ms var(--ease-out);
+    }
+    .cmd__copy:hover {
+      background: var(--surface);
+    }
+    .cmd__copy:active {
+      transform: scale(0.95);
+    }
+    .install__p {
+      margin-top: 16px;
+      color: var(--text-dim);
+      font-size: 0.94rem;
+    }
+    .install__card .btn {
+      width: 100%;
+    }
+    .install__why {
+      margin-top: clamp(24px, 3vw, 32px);
+      max-width: 60ch;
+      color: var(--text-mute);
+      font-size: 0.92rem;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .oss {
+      text-align: center;
+    }
+    .oss__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .oss__title {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+    }
+    .oss__text {
+      margin-top: 16px;
+      color: var(--text-dim);
+      font-size: 1.1rem;
+    }
+    .oss .btn {
+      margin-top: 32px;
+    }
+
+    .foot {
+      border-top: 1px solid var(--line);
+      padding-block: 40px;
+    }
+    .foot__inner {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 18px 28px;
+      justify-content: space-between;
+    }
+    .foot__links {
+      display: flex;
+      gap: 24px;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+    .foot__links a {
+      transition: color 160ms var(--ease-out);
+    }
+    .foot__links a:hover {
+      color: var(--text);
+    }
+    .foot__copy {
+      color: var(--text-mute);
+      font-size: 0.9rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .notch,
+      .np,
+      .wx,
+      .np__progress > i,
+      .card,
+      .btn {
+        transition: none;
+      }
+      .eq span {
+        animation: none;
+        transform: scaleY(0.6);
+      }
+      .notch__idle {
+        animation: none;
+      }
+    }
+  </style>
+
+  <script>
+    type Beat = 'music' | 'weather' | 'idle';
+    const stage = document.querySelector<HTMLElement>('[data-beat]');
+    const sequence: { name: Beat; ms: number }[] = [
+      { name: 'music', ms: 5600 },
+      { name: 'weather', ms: 3400 },
+      { name: 'idle', ms: 1800 },
+    ];
+
+    if (stage && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let index = 0;
+      let timer: number | undefined;
+
+      const advance = () => {
+        index = (index + 1) % sequence.length;
+        stage.dataset.beat = sequence[index].name;
+        timer = window.setTimeout(advance, sequence[index].ms);
+      };
+
+      const start = () => {
+        if (timer) return;
+        timer = window.setTimeout(advance, sequence[index].ms);
+      };
+      const stop = () => {
+        window.clearTimeout(timer);
+        timer = undefined;
+      };
+
+      const io = new IntersectionObserver(
+        ([entry]) => (entry.isIntersecting ? start() : stop()),
+        { threshold: 0.3 },
+      );
+      io.observe(stage);
+    }
+
+    for (const button of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+      button.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(button.dataset.copy ?? '');
+          const original = button.textContent;
+          button.textContent = 'Copied';
+          window.setTimeout(() => (button.textContent = original), 1400);
+        } catch {
+          /* clipboard unavailable; ignore */
+        }
+      });
+    }
+  </script>
+</Base>
