@@ -120,11 +120,13 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 
 - Notch `NSPanel` surface: borderless, non-activating, pinned at the notch across
   every Space.
+- Now playing: live track and artist in the notch via the vendored
+  `ungive/mediaremote-adapter`.
 - Weather seam with the keyless `OpenMeteoProvider`.
 
 **Planned**
 
-- Now-playing via `ungive/mediaremote-adapter`.
+- Album artwork and media controls (play / pause / skip) from the notch.
 - Declarative bring-your-own weather providers + Keychain key storage.
 - Volume / brightness / Spaces HUD replacements.
 - Sparkle auto-updates.
