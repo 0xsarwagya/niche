@@ -7,10 +7,10 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section("Modules") {
-                Toggle("Now Playing", isOn: $prefs.showNowPlaying)
-                Toggle("Weather glance", isOn: $prefs.showWeather)
-                Toggle("Volume & brightness HUD", isOn: $prefs.showHUD)
-                Toggle("Battery alerts", isOn: $prefs.showBattery)
+                moduleRow("music.note", "Now Playing", "Track, controls, and scrubber", $prefs.showNowPlaying)
+                moduleRow("cloud.sun", "Weather", "A glance when the notch is idle", $prefs.showWeather)
+                moduleRow("speaker.wave.2", "Volume & Brightness", "Replace the system HUD", $prefs.showHUD)
+                moduleRow("battery.25", "Battery alerts", "Charging and low-battery warnings", $prefs.showBattery)
             }
 
             Section("Accent") {
@@ -41,6 +41,21 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 380, height: 400)
+        .frame(width: 400, height: 470)
+    }
+
+    private func moduleRow(_ icon: String, _ title: String, _ subtitle: String, _ isOn: Binding<Bool>) -> some View {
+        Toggle(isOn: isOn) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 22)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title)
+                    Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+        }
     }
 }
