@@ -25,11 +25,23 @@ xcodebuild build -scheme Niche -destination 'platform=macOS'
 xcodebuild test  -scheme Niche -destination 'platform=macOS'
 ```
 
-### A stable dev signing identity (recommended)
+### Install a persistent build
 
-Ad-hoc signing (`CODE_SIGN_IDENTITY=-`) gives each rebuild a fresh identity, so
-macOS re-prompts for Accessibility, Bluetooth, and other TCC permissions every
-time. Create one self-signed certificate and reuse it so the grants stick:
+```bash
+apps/macos/scripts/install.sh
+```
+
+This builds a Release app and installs it to `/Applications`. The important part
+is `CODE_SIGN_INJECT_BASE_ENTITLEMENTS=NO`: without it, every local build carries
+`get-task-allow` (a debuggable flag), and macOS refuses to persist Accessibility
+and other TCC grants for a debuggable app — so it re-prompts on **every** launch.
+Stripping it makes the one-time Accessibility grant stick.
+
+### A stable dev signing identity (optional)
+
+Ad-hoc signing (`CODE_SIGN_IDENTITY=-`) gives each build a fresh code hash, so
+grants re-prompt once after every rebuild. A reused self-signed certificate keeps
+them across versions:
 
 1. **Keychain Access → Certificate Assistant → Create a Certificate…**
 2. Name `Niche Dev`, Identity Type **Self Signed Root**, Certificate Type
