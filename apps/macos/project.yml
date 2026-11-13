@@ -34,6 +34,9 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.niche.app
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: com.niche.app.debug
 
   NicheTests:
     type: bundle.unit-test
