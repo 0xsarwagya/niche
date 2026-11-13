@@ -71,18 +71,37 @@ struct NotchView: View {
                 .animation(NicheMotion.expand(reduced: reduced), value: model.prompt)
                 .animation(NicheMotion.morph(reduced: reduced), value: model.timerRemaining != nil)
                 .animation(NicheMotion.morph(reduced: reduced), value: notchContent)
+                .animation(reduced ? nil : .easeInOut(duration: 0.4), value: accent)
         }
     }
 
     /// One persistent black shell: the stable object. It grows from the physical notch and its
     /// content morphs inside, rather than the whole island being torn down per state.
     private var island: some View {
-        UnevenRoundedRectangle(bottomLeadingRadius: cornerRadius, bottomTrailingRadius: cornerRadius, style: .continuous)
+        let shape = UnevenRoundedRectangle(bottomLeadingRadius: cornerRadius, bottomTrailingRadius: cornerRadius, style: .continuous)
+        return shape
             .fill(.black)
             .frame(width: islandSize.width, height: islandSize.height)
+            .overlay { ambience(in: shape) }
             .overlay(alignment: .top) { content }
             .shadow(color: .black.opacity(notchContent == .hidden ? 0 : 0.35), radius: 7, y: 3)
             .contentShape(Rectangle())
+    }
+
+    /// A barely-there wash of the album colour inside the expanded media shell — almost
+    /// invisible unless you look for it. Pure black everywhere else.
+    @ViewBuilder
+    private func ambience(in shape: some Shape) -> some View {
+        if expanded, let image = model.artwork {
+            Image(nsImage: image)
+                .resizable()
+                .scaledToFill()
+                .blur(radius: 34)
+                .opacity(0.12)
+                .clipShape(shape)
+                .allowsHitTesting(false)
+                .transition(.opacity)
+        }
     }
 
     @ViewBuilder
@@ -124,6 +143,8 @@ struct NotchView: View {
     private func trackRow(_ track: NowPlaying) -> some View {
         HStack(spacing: 10) {
             artwork
+                .id(track.title)
+                .transition(reduced ? .opacity : .push(from: .trailing))
             VStack(alignment: .leading, spacing: 1) {
                 Text(track.title)
                     .font(.system(size: 12, weight: .semibold))
@@ -135,6 +156,8 @@ struct NotchView: View {
                         .lineLimit(1)
                 }
             }
+            .id(track.title)
+            .transition(.opacity)
             Spacer(minLength: 6)
             if expanded {
                 transport(track).transition(.opacity)
