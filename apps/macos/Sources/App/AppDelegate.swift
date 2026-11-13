@@ -64,6 +64,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         weatherItem.target = self
         menu.addItem(weatherItem)
 
+        let hudItem = NSMenuItem(title: "Enable Volume/Brightness HUD…", action: #selector(enableKeyHUD), keyEquivalent: "")
+        hudItem.target = self
+        menu.addItem(hudItem)
+
         let sourceMenu = NSMenu()
         let defaultItem = NSMenuItem(title: "Open-Meteo (default)", action: #selector(selectProvider(_:)), keyEquivalent: "")
         defaultItem.target = self
@@ -136,11 +140,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func setUpMediaKeys() {
-        let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
-        guard AXIsProcessTrustedWithOptions(options) else {
-            Self.logger.info("Accessibility not granted; system volume/brightness OSD not suppressed")
+        guard AXIsProcessTrusted() else {
+            Self.logger.info("Accessibility not granted; enable it from the menu to suppress the system OSD")
             return
         }
+        startMediaKeyTap()
+    }
+
+    private func startMediaKeyTap() {
+        guard mediaKeys == nil else { return }
         let tap = MediaKeyTap()
         guard tap.start() else { return }
         mediaKeys = tap
@@ -150,6 +158,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.handleMediaKey(key)
             }
         }
+    }
+
+    @objc private func enableKeyHUD() {
+        guard AXIsProcessTrusted() else {
+            _ = AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary)
+            return
+        }
+        startMediaKeyTap()
     }
 
     private func handleMediaKey(_ key: MediaKey) {

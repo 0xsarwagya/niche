@@ -31,4 +31,5 @@ tccutil reset Accessibility com.niche.app >/dev/null 2>&1 || true
 open "$DEST"
 
 echo "Installed to $DEST."
-echo "Grant Accessibility once: System Settings > Privacy & Security > Accessibility."
+echo "To replace the system volume/brightness OSD, click the menu bar icon ->"
+echo "\"Enable Volume/Brightness HUD\" and grant Accessibility once."
