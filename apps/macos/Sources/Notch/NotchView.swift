@@ -102,15 +102,18 @@ struct NotchView: View {
             .contentShape(Rectangle())
     }
 
-    /// Niche's signature: one small accent mark centred in the shell's bottom chin — present only
-    /// when the shell has opened, so the idle notch stays invisible. The album accent ties it into
-    /// the rest of the surface.
+    /// Niche's signature: one small mark centred in the shell's bottom chin. Invisible on the idle
+    /// notch, it surfaces as a dim lip the moment the idle notch is hovered — the affordance that
+    /// says "there's something here" — and fills with the album accent once the shell opens.
     private var signature: some View {
-        Capsule()
-            .fill(accent)
-            .frame(width: 22, height: 3)
+        let idleHint = notchContent == .hidden && model.isHovered
+        let shown = notchContent != .hidden || idleHint
+        return Capsule()
+            .fill(idleHint ? AnyShapeStyle(.white.opacity(0.5)) : AnyShapeStyle(accent))
+            .frame(width: idleHint ? 16 : 22, height: 3)
             .padding(.bottom, 4)
-            .opacity(notchContent == .hidden ? 0 : 0.9)
+            .opacity(shown ? 0.9 : 0)
+            .animation(.easeOut(duration: 0.18), value: idleHint)
     }
 
     /// A barely-there wash of the album colour inside the expanded media shell — almost
