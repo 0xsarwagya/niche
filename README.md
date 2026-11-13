@@ -175,6 +175,7 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 - Volume & brightness HUD at the notch, replacing the system OSD (needs Accessibility permission).
 - Battery HUD: charging plug-in/unplug and a red low-battery alert.
 - Lively spring motion, trackpad haptics, and tap-the-island to play/pause.
+- Right-click the notch for quick actions (timer, Settings, Quit); scroll over it to change volume.
 - Countdown timers, started from a menu bar item (which also has Quit).
 - Weather glance on hovering the idle notch (opt-in location; keyless Open-Meteo).
 - Launch at login, toggled from the menu bar.

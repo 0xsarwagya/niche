@@ -29,6 +29,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         nowPlaying.observeLevels(BatteryMonitor())
         let panel = NotchPanel(screen: screen, model: nowPlaying, weather: weather)
         panel.orderFrontRegardless()
+        panel.setContextMenu(makeNotchMenu())
         self.panel = panel
         nowPlaying.observe(PromptInbox())
         setUpMenuBar()
@@ -50,15 +51,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let menu = NSMenu()
 
-        let timerMenu = NSMenu()
-        for minutes in [1, 5, 10, 25] {
-            let entry = NSMenuItem(title: "\(minutes) min", action: #selector(startTimer(_:)), keyEquivalent: "")
-            entry.target = self
-            entry.tag = minutes
-            timerMenu.addItem(entry)
-        }
         let timerItem = NSMenuItem(title: "Start Timer", action: nil, keyEquivalent: "")
-        timerItem.submenu = timerMenu
+        timerItem.submenu = makeTimerSubmenu()
         menu.addItem(timerItem)
 
         let weatherItem = NSMenuItem(title: "Enable Weather", action: #selector(enableWeather), keyEquivalent: "")
@@ -99,6 +93,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(withTitle: "Quit Niche", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         item.menu = menu
         statusItem = item
+    }
+
+    private func makeTimerSubmenu() -> NSMenu {
+        let submenu = NSMenu()
+        for minutes in [1, 5, 10, 25] {
+            let entry = NSMenuItem(title: "\(minutes) min", action: #selector(startTimer(_:)), keyEquivalent: "")
+            entry.target = self
+            entry.tag = minutes
+            submenu.addItem(entry)
+        }
+        return submenu
+    }
+
+    /// A focused quick-action menu for right-clicking the notch itself; the full set stays in the
+    /// menu bar.
+    private func makeNotchMenu() -> NSMenu {
+        let menu = NSMenu()
+        let timerItem = NSMenuItem(title: "Start Timer", action: nil, keyEquivalent: "")
+        timerItem.submenu = makeTimerSubmenu()
+        menu.addItem(timerItem)
+        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: "")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+        menu.addItem(.separator())
+        menu.addItem(withTitle: "Quit Niche", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
+        return menu
     }
 
     @objc private func startTimer(_ sender: NSMenuItem) {

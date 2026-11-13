@@ -8,6 +8,7 @@ private final class PassthroughHostingView: NSHostingView<NotchView> {
     private let model: NowPlayingModel
     private let weather: WeatherModel
     private let notch: NotchMetrics
+    var contextMenu: NSMenu?
 
     init(model: NowPlayingModel, weather: WeatherModel, notch: NotchMetrics) {
         self.model = model
@@ -46,17 +47,38 @@ private final class PassthroughHostingView: NSHostingView<NotchView> {
         }
         super.mouseDown(with: event)
     }
+
+    /// Right-click the notch for quick actions. Only reaches here over the island, since hitTest
+    /// rejects the clear margins.
+    override func rightMouseDown(with event: NSEvent) {
+        guard let contextMenu else { return super.rightMouseDown(with: event) }
+        NSMenu.popUpContextMenu(contextMenu, with: event, for: self)
+    }
+
+    /// Scroll over the notch to nudge the volume, reusing the HUD surface. Gated on the HUD module
+    /// so disabling it also releases the scroll gesture. Momentum coast is ignored so one swipe
+    /// doesn't overshoot, and the trackpad's fine deltas are damped harder than a wheel's clicks.
+    override func scrollWheel(with event: NSEvent) {
+        guard Preferences.shared.showHUD, event.momentumPhase == [], event.scrollingDeltaY != 0 else {
+            return super.scrollWheel(with: event)
+        }
+        let gain = event.hasPreciseScrollingDeltas ? 0.002 : 0.04
+        let step = max(-0.08, min(0.08, event.scrollingDeltaY * gain))
+        model.showLevel(SystemLevel(kind: .volume, value: SystemControls.adjustVolume(by: step)))
+    }
 }
 
 /// Borderless, non-activating panel pinned at the notch across every Space.
 final class NotchPanel: NSPanel {
     private static let logger = Logger(subsystem: "com.niche.app", category: "NotchPanel")
+    private let hosting: PassthroughHostingView
 
     override var canBecomeKey: Bool { true }
 
     init(screen: NSScreen, model: NowPlayingModel, weather: WeatherModel) {
         let notch = NotchMetrics(screen: screen)
         let frame = NotchGeometry.panelFrame(in: screen.frame)
+        hosting = PassthroughHostingView(model: model, weather: weather, notch: notch)
         super.init(
             contentRect: frame,
             styleMask: [.borderless, .nonactivatingPanel],
@@ -72,11 +94,15 @@ final class NotchPanel: NSPanel {
         isMovable = false
         hidesOnDeactivate = false
 
-        let hosting = PassthroughHostingView(model: model, weather: weather, notch: notch)
         hosting.sizingOptions = []
         hosting.autoresizingMask = [.width, .height]
         contentView = hosting
         setFrame(frame, display: true)
         Self.logger.info("Notch panel created")
+    }
+
+    /// Supplies the quick-action menu shown when the notch is right-clicked.
+    func setContextMenu(_ menu: NSMenu) {
+        hosting.contextMenu = menu
     }
 }
