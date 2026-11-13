@@ -94,9 +94,7 @@ struct NotchView: View {
             case .prompt:
                 if let prompt = model.prompt { promptView(prompt) }
             case .hud:
-                if let hud = model.hud {
-                    levelRow(symbol: symbol(for: hud), fraction: hud.value, tint: hud.warning ? .red : .white)
-                }
+                if let hud = model.hud { hudRow(hud) }
             case .timer:
                 if let remaining = model.timerRemaining { timerRow(remaining) }
             case .nowPlaying:
@@ -180,16 +178,17 @@ struct NotchView: View {
 
     // MARK: HUD, timer, weather
 
-    private func levelRow(symbol: String, fraction: Double, tint: Color) -> some View {
-        HStack(spacing: 11) {
-            Image(systemName: symbol)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(tint)
-                .frame(width: 20)
+    private func hudRow(_ level: SystemLevel) -> some View {
+        let tint: Color = level.warning ? .red : .white
+        return HStack(spacing: 11) {
+            hudGlyph(level, tint: tint)
+                .frame(width: 22)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule().fill(.white.opacity(0.22)).frame(height: 4)
-                    Capsule().fill(tint).frame(width: geo.size.width * min(max(fraction, 0), 1), height: 4)
+                    Capsule().fill(tint)
+                        .frame(width: geo.size.width * clamp(level.value), height: 4)
+                        .animation(reduced ? nil : .easeOut(duration: 0.1), value: level.value)
                 }
                 .frame(maxHeight: .infinity)
             }
@@ -197,6 +196,33 @@ struct NotchView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+
+    /// Each level kind gets its own personality: volume's waves fill with the value, brightness's
+    /// sun grows and glows, battery stays a plain glyph.
+    @ViewBuilder
+    private func hudGlyph(_ level: SystemLevel, tint: Color) -> some View {
+        switch level.kind {
+        case .volume:
+            Image(systemName: level.value <= 0.001 ? "speaker.slash.fill" : "speaker.wave.3.fill",
+                  variableValue: level.value)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(tint)
+                .contentTransition(.symbolEffect(.replace))
+        case .brightness:
+            Image(systemName: "sun.max.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(tint)
+                .scaleEffect(0.82 + 0.18 * level.value)
+                .shadow(color: tint.opacity(0.55 * level.value), radius: 4 * level.value)
+                .animation(reduced ? nil : .easeOut(duration: 0.12), value: level.value)
+        case .battery:
+            Image(systemName: level.warning ? "battery.25" : (level.charging ? "bolt.fill" : "battery.100"))
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(tint)
+        }
+    }
+
+    private func clamp(_ value: Double) -> Double { min(max(value, 0), 1) }
 
     private func timerRow(_ remaining: TimeInterval) -> some View {
         HStack(spacing: 11) {
@@ -342,27 +368,43 @@ private struct Scrubber: View {
     private func clamp(_ value: Double) -> Double { min(max(value, 0), 1) }
 }
 
-/// Three accent bars that bounce while audio is playing; static when motion is reduced.
+/// Three accent bars that bob independently while audio plays — each with its own period and
+/// phase so the motion reads as organic, not synchronised. Paused or reduced, they settle to dots.
 private struct PlayingBars: View {
     var isPlaying: Bool
     var color: Color
     var reduced: Bool
 
-    @State private var high = false
-    private let lows: [CGFloat] = [5, 5, 5]
-    private let highs: [CGFloat] = [11, 16, 13]
+    private let periods: [Double] = [0.90, 0.68, 1.12]
+    private let phases: [Double] = [0, 1.3, 2.4]
 
     var body: some View {
+        Group {
+            if isPlaying && !reduced {
+                TimelineView(.animation) { timeline in
+                    bars(at: timeline.date.timeIntervalSinceReferenceDate)
+                }
+            } else {
+                bars(at: nil)
+            }
+        }
+        .frame(height: 16)
+        .opacity(isPlaying ? 1 : 0.4)
+    }
+
+    private func bars(at time: Double?) -> some View {
         HStack(spacing: 3) {
             ForEach(0..<3, id: \.self) { index in
                 Capsule()
                     .fill(color)
-                    .frame(width: 3, height: high && isPlaying ? highs[index] : lows[index])
+                    .frame(width: 3, height: barHeight(time, index))
             }
         }
-        .frame(height: 16)
-        .opacity(isPlaying ? 1 : 0.45)
-        .animation(reduced ? nil : .easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: high)
-        .onAppear { high = !reduced }
+    }
+
+    private func barHeight(_ time: Double?, _ index: Int) -> CGFloat {
+        guard let time else { return 4 }
+        let wave = sin(time / periods[index] * .pi * 2 + phases[index])
+        return 5 + CGFloat((wave + 1) / 2) * 11
     }
 }
