@@ -13,12 +13,7 @@ struct NotchView: View {
     private var expanded: Bool { track != nil && model.isHovered }
 
     private var notchContent: NotchGeometry.Content {
-        NotchGeometry.content(
-            hasTrack: track != nil,
-            hud: model.hud != nil,
-            timer: model.timerRemaining != nil,
-            weather: model.isHovered && weather.snapshot != nil
-        )
+        NotchView.resolveContent(model: model, weather: weather)
     }
 
     private var islandSize: CGSize {
@@ -26,7 +21,27 @@ struct NotchView: View {
     }
 
     private var accent: Color {
-        model.accentColor ?? Color(red: 0.78, green: 0.97, blue: 0.32)
+        let prefs = Preferences.shared
+        if prefs.useCustomAccent { return prefs.customAccent }
+        return model.accentColor ?? Preferences.defaultAccent
+    }
+
+    /// The single source of truth for what the island shows, honouring the enabled modules.
+    /// Both the view and the panel's hit region call this so clicks match what is drawn.
+    static func resolveContent(model: NowPlayingModel, weather: WeatherModel) -> NotchGeometry.Content {
+        let prefs = Preferences.shared
+        let hudEnabled: Bool
+        switch model.hud?.kind {
+        case .volume, .brightness: hudEnabled = prefs.showHUD
+        case .battery: hudEnabled = prefs.showBattery
+        case nil: hudEnabled = false
+        }
+        return NotchGeometry.content(
+            hasTrack: model.current != nil && prefs.showNowPlaying,
+            hud: hudEnabled,
+            timer: model.timerRemaining != nil,
+            weather: model.isHovered && weather.snapshot != nil && prefs.showWeather
+        )
     }
 
     var body: some View {

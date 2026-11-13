@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import SwiftUI
 import os
 
 /// Creates the notch panel and menu bar item on launch, and feeds the panel its state.
@@ -16,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var mediaKeys: MediaKeyTap?
     private var mediaKeyTask: Task<Void, Never>?
+    private var settingsWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard let screen = NSScreen.main else {
@@ -79,6 +81,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(.separator())
 
+        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+
         let loginItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLogin(_:)), keyEquivalent: "")
         loginItem.target = self
         loginItem.state = LoginItem.isEnabled ? .on : .off
@@ -114,6 +120,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func toggleLogin(_ sender: NSMenuItem) {
         LoginItem.toggle()
         sender.state = LoginItem.isEnabled ? .on : .off
+    }
+
+    @objc private func openSettings() {
+        if settingsWindow == nil {
+            let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView()))
+            window.title = "Niche Settings"
+            window.styleMask = [.titled, .closable]
+            window.isReleasedWhenClosed = false
+            window.center()
+            settingsWindow = window
+        }
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 
     private func setUpMediaKeys() {

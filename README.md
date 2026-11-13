@@ -151,6 +151,7 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 - Weather glance on hovering the idle notch (opt-in location; keyless Open-Meteo).
 - Launch at login, toggled from the menu bar.
 - Accent colour (equalizer, scrubber) derived from the album artwork.
+- Settings window (⌘,): toggle each module, pick a custom accent, tune the HUD duration.
 
 **Planned**
 
