@@ -11,6 +11,7 @@ struct NotchView: View {
 
     @State private var reply = ""
     @FocusState private var replyFocused: Bool
+    @State private var hoverTask: Task<Void, Never>?
     @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
 
     private var track: NowPlaying? { model.current }
@@ -62,8 +63,14 @@ struct NotchView: View {
             Color.clear.allowsHitTesting(false)
             island
                 .onHover { hovering in
-                    if hovering, track != nil { Haptics.expand() }
-                    model.isHovered = hovering
+                    hoverTask?.cancel()
+                    guard hovering else { model.isHovered = false; return }
+                    hoverTask = Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(100))
+                        guard !Task.isCancelled else { return }
+                        model.isHovered = true
+                        if track != nil { Haptics.expand() }
+                    }
                 }
                 .animation(NicheMotion.expand(reduced: reduced), value: expanded)
                 .animation(NicheMotion.morph(reduced: reduced), value: track)
@@ -192,9 +199,9 @@ struct NotchView: View {
     }
 
     private func transport(_ track: NowPlaying) -> some View {
-        HStack(spacing: 14) {
+        HStack(spacing: 12) {
             ControlButton(symbol: "backward.fill") { Haptics.tap(); model.previousTrack() }
-            ControlButton(symbol: track.isPlaying ? "pause.fill" : "play.fill") { Haptics.tap(); model.togglePlayPause() }
+            ControlButton(symbol: track.isPlaying ? "pause.fill" : "play.fill", prominent: true) { Haptics.tap(); model.togglePlayPause() }
             ControlButton(symbol: "forward.fill") { Haptics.tap(); model.nextTrack() }
         }
     }
@@ -406,21 +413,47 @@ struct NotchView: View {
 
 private struct ControlButton: View {
     let symbol: String
+    var prominent: Bool = false
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: 13, weight: .semibold))
-                .frame(width: 24, height: 24)
-                .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .foregroundStyle(.white)
+        .buttonStyle(ControlButtonStyle(prominent: prominent))
     }
 }
 
-/// A thin draggable progress bar; reports the sought time on release.
+/// Transport buttons: a circular hover wash and a press that scales down, then springs back.
+private struct ControlButtonStyle: ButtonStyle {
+    var prominent: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        ControlButtonBody(configuration: configuration, prominent: prominent)
+    }
+}
+
+private struct ControlButtonBody: View {
+    let configuration: ButtonStyleConfiguration
+    let prominent: Bool
+    @State private var hovering = false
+
+    var body: some View {
+        configuration.label
+            .font(.system(size: prominent ? 15 : 13, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 26, height: 26)
+            .background(Circle().fill(.white.opacity(hovering ? 0.12 : 0)))
+            .scaleEffect(configuration.isPressed ? 0.88 : 1)
+            .contentShape(Circle())
+            .onHover { hovering = $0 }
+            .animation(.spring(response: 0.2, dampingFraction: 0.6), value: configuration.isPressed)
+            .animation(.easeOut(duration: 0.12), value: hovering)
+    }
+}
+
+/// A draggable progress bar. At rest it is a thin line; on hover it thickens, grows a handle,
+/// and reveals elapsed / remaining times. A haptic marks the start of a scrub.
 private struct Scrubber: View {
     let elapsed: TimeInterval
     let duration: TimeInterval
@@ -428,27 +461,55 @@ private struct Scrubber: View {
     let onSeek: (TimeInterval) -> Void
 
     @State private var dragFraction: Double?
+    @State private var hovering = false
+
+    private var active: Bool { hovering || dragFraction != nil }
+    private var baseFraction: Double { duration > 0 ? clamp(elapsed / duration) : 0 }
+    private var currentElapsed: TimeInterval { (dragFraction ?? baseFraction) * duration }
 
     var body: some View {
-        GeometryReader { geo in
-            let fraction = dragFraction ?? (duration > 0 ? clamp(elapsed / duration) : 0)
-            ZStack(alignment: .leading) {
-                Capsule().fill(.white.opacity(0.22)).frame(height: 3)
-                Capsule().fill(color).frame(width: geo.size.width * fraction, height: 3)
+        VStack(spacing: 3) {
+            if active {
+                HStack {
+                    Text(NotchView.format(currentElapsed))
+                    Spacer()
+                    Text("-" + NotchView.format(max(duration - currentElapsed, 0)))
+                }
+                .font(.system(size: 9, weight: .medium).monospacedDigit())
+                .foregroundStyle(.white.opacity(0.55))
+                .transition(.opacity)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { dragFraction = clamp($0.location.x / geo.size.width) }
-                    .onEnded { value in
-                        let target = clamp(value.location.x / geo.size.width)
-                        dragFraction = nil
-                        onSeek(target * duration)
+            GeometryReader { geo in
+                let fraction = dragFraction ?? baseFraction
+                ZStack(alignment: .leading) {
+                    Capsule().fill(.white.opacity(0.22)).frame(height: active ? 5 : 3)
+                    Capsule().fill(color).frame(width: geo.size.width * fraction, height: active ? 5 : 3)
+                    if active {
+                        Circle().fill(.white)
+                            .frame(width: 9, height: 9)
+                            .offset(x: geo.size.width * fraction - 4.5)
+                            .transition(.scale.combined(with: .opacity))
                     }
-            )
+                }
+                .frame(maxHeight: .infinity)
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { value in
+                            if dragFraction == nil { Haptics.tap() }
+                            dragFraction = clamp(value.location.x / geo.size.width)
+                        }
+                        .onEnded { value in
+                            let target = clamp(value.location.x / geo.size.width)
+                            dragFraction = nil
+                            onSeek(target * duration)
+                        }
+                )
+            }
+            .frame(height: 10)
         }
-        .frame(height: 14)
+        .onHover { hovering = $0 }
+        .animation(.easeOut(duration: 0.15), value: active)
     }
 
     private func clamp(_ value: Double) -> Double { min(max(value, 0), 1) }
