@@ -124,6 +124,7 @@ final class NowPlayingModel {
                 guard let self, let remaining = self.timerRemaining else { return }
                 if remaining <= 1 {
                     self.timerRemaining = 0
+                    Haptics.tap()
                     try? await Task.sleep(for: .seconds(2))
                     self.timerRemaining = nil
                     return

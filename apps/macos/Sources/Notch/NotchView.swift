@@ -248,15 +248,44 @@ struct NotchView: View {
     private func clamp(_ value: Double) -> Double { min(max(value, 0), 1) }
 
     private func timerRow(_ remaining: TimeInterval) -> some View {
-        HStack(spacing: 11) {
-            Image(systemName: "timer")
-                .font(.system(size: 14, weight: .semibold))
-                .frame(width: 20)
-            Text(NotchView.format(remaining))
-                .font(.system(size: 15, weight: .semibold).monospacedDigit())
+        let total = max(model.timerTotal, 1)
+        let progress = min(max(remaining / total, 0), 1)
+        let finished = remaining <= 0
+        let tint = timerTint(remaining: remaining, finished: finished)
+        return HStack(spacing: 11) {
+            ZStack {
+                Circle().stroke(.white.opacity(0.18), lineWidth: 2.5)
+                Circle()
+                    .trim(from: 0, to: finished ? 1 : progress)
+                    .stroke(tint, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .animation(reduced ? nil : .easeInOut(duration: 0.3), value: progress)
+                if finished {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundStyle(tint)
+                        .symbolEffect(.bounce, value: finished)
+                }
+            }
+            .frame(width: 18, height: 18)
+            if finished {
+                Text("Timer finished").font(.system(size: 13, weight: .semibold))
+            } else {
+                Text(NotchView.format(remaining))
+                    .font(.system(size: 15, weight: .semibold).monospacedDigit())
+                    .foregroundStyle(tint)
+            }
             Spacer(minLength: 6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// White while there is time, the accent under a minute, warm under ten seconds, accent when done.
+    private func timerTint(remaining: TimeInterval, finished: Bool) -> Color {
+        if finished { return accent }
+        if remaining <= 10 { return Color(red: 1, green: 0.58, blue: 0.3) }
+        if remaining <= 60 { return accent }
+        return .white
     }
 
     private func promptView(_ prompt: AgentPrompt) -> some View {
