@@ -61,4 +61,15 @@ enum NotchGeometry {
         case .prompt: 25
         }
     }
+
+    /// The concave top-shoulder radius. Zero while hidden so the idle footprint stays exactly the
+    /// physical notch (and stays invisible); positive once the shell has grown past the notch, where
+    /// the shoulders read as the black hanging out of the ceiling.
+    static func shoulderRadius(content: Content) -> CGFloat {
+        switch content {
+        case .hidden: 0
+        case .prompt: 14
+        default: 12
+        }
+    }
 }

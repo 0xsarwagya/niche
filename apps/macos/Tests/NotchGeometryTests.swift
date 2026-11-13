@@ -47,4 +47,13 @@ struct NotchGeometryTests {
         #expect(NotchGeometry.cornerRadius(content: .prompt, hovered: false)
             > NotchGeometry.cornerRadius(content: .hud, hovered: false))
     }
+
+    @Test func idleHasNoShoulders() {
+        #expect(NotchGeometry.shoulderRadius(content: .hidden) == 0)
+    }
+
+    @Test func expandedStatesHaveShoulders() {
+        #expect(NotchGeometry.shoulderRadius(content: .nowPlaying) > 0)
+        #expect(NotchGeometry.shoulderRadius(content: .prompt) > 0)
+    }
 }

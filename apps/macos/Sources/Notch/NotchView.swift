@@ -33,6 +33,10 @@ struct NotchView: View {
         NotchGeometry.cornerRadius(content: notchContent, hovered: model.isHovered)
     }
 
+    private var shoulderRadius: CGFloat {
+        NotchGeometry.shoulderRadius(content: notchContent)
+    }
+
     private var accent: Color {
         let prefs = Preferences.shared
         if prefs.useCustomAccent { return prefs.customAccent }
@@ -87,7 +91,7 @@ struct NotchView: View {
     /// One persistent black shell: the stable object. It grows from the physical notch and its
     /// content morphs inside, rather than the whole island being torn down per state.
     private var island: some View {
-        let shape = UnevenRoundedRectangle(bottomLeadingRadius: cornerRadius, bottomTrailingRadius: cornerRadius, style: .continuous)
+        let shape = NotchShape(bottomRadius: cornerRadius, shoulderRadius: shoulderRadius)
         return shape
             .fill(.black)
             .frame(width: islandSize.width, height: islandSize.height)
