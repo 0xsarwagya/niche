@@ -36,6 +36,16 @@ private final class PassthroughHostingView: NSHostingView<NotchView> {
         )
         return islandRect.contains(local) ? super.hitTest(point) : nil
     }
+
+    /// Take keyboard focus only when the user clicks an active prompt — never on arrival, so an
+    /// agent's question can't steal the keyboard while the user works elsewhere.
+    override func mouseDown(with event: NSEvent) {
+        if model.prompt != nil {
+            window?.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
+        super.mouseDown(with: event)
+    }
 }
 
 /// Borderless, non-activating panel pinned at the notch across every Space.

@@ -289,7 +289,7 @@ struct NotchView: View {
     }
 
     private func promptView(_ prompt: AgentPrompt) -> some View {
-        VStack(alignment: .leading, spacing: 7) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 Image(systemName: "sparkles")
                     .font(.system(size: 11, weight: .semibold))
@@ -300,26 +300,61 @@ struct NotchView: View {
                     .lineLimit(2)
                 Spacer(minLength: 0)
             }
-            HStack(spacing: 6) {
-                TextField("Reply…", text: $reply)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 12))
-                    .foregroundStyle(.white)
-                    .focused($replyFocused)
-                    .onSubmit(sendReply)
-                Button(action: sendReply) {
-                    Image(systemName: "arrow.up.circle.fill").font(.system(size: 16))
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(accent)
+            if prompt.options.isEmpty {
+                replyField
+            } else {
+                choiceRow(prompt.options)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(.white.opacity(0.12), in: Capsule())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .id(prompt.id)
-        .onAppear { replyFocused = true }
+    }
+
+    /// Free-text reply. Passive: it never grabs focus on its own — the user clicks it to type,
+    /// so an agent can't steal the keyboard while you work elsewhere.
+    private var replyField: some View {
+        HStack(spacing: 6) {
+            TextField("Reply…", text: $reply)
+                .textFieldStyle(.plain)
+                .font(.system(size: 12))
+                .foregroundStyle(.white)
+                .focused($replyFocused)
+                .onSubmit(sendReply)
+            Button(action: sendReply) {
+                Image(systemName: "arrow.up.circle.fill").font(.system(size: 16))
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(accent)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(.white.opacity(0.12), in: Capsule())
+        .contentShape(Capsule())
+        .onTapGesture { replyFocused = true }
+    }
+
+    private func choiceRow(_ options: [String]) -> some View {
+        HStack(spacing: 8) {
+            ForEach(Array(options.prefix(3).enumerated()), id: \.offset) { index, option in
+                Button {
+                    Haptics.tap()
+                    model.answer(option)
+                } label: {
+                    Text(option)
+                        .font(.system(size: 11, weight: .semibold))
+                        .lineLimit(1)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .foregroundStyle(index == 0 ? .black : .white)
+                        .background(
+                            index == 0 ? AnyShapeStyle(accent) : AnyShapeStyle(.white.opacity(0.14)),
+                            in: Capsule()
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+            Spacer(minLength: 0)
+        }
     }
 
     private func sendReply() {
@@ -327,7 +362,6 @@ struct NotchView: View {
         guard !text.isEmpty else { return }
         model.answer(text)
         reply = ""
-        replyFocused = true
     }
 
     private func weatherRow(_ snapshot: WeatherSnapshot) -> some View {

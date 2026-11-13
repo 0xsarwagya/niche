@@ -56,13 +56,12 @@ final class NowPlayingModel {
         levelsTasks.append(task)
     }
 
-    func observePrompts(_ inbox: PromptInbox, onPrompt: @escaping @MainActor () -> Void) {
+    func observePrompts(_ inbox: PromptInbox) {
         self.inbox = inbox
         promptsTask = Task { [weak self] in
             for await prompt in inbox.prompts {
                 guard let self else { break }
                 self.promptQueue.append(prompt)
-                onPrompt()
             }
         }
     }

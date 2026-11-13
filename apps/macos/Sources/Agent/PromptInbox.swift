@@ -45,11 +45,27 @@ struct PromptInbox: Sendable {
             .filter { $0.pathExtension == "ask" }
             .sorted { modified($0) < modified($1) }
             .compactMap { file in
-                guard let text = try? String(contentsOf: file, encoding: .utf8) else { return nil }
+                guard let data = try? Data(contentsOf: file) else { return nil }
                 try? FileManager.default.removeItem(at: file)
-                let question = text.trimmingCharacters(in: .whitespacesAndNewlines)
-                return question.isEmpty ? nil : AgentPrompt(id: file.deletingPathExtension().lastPathComponent, question: question)
+                return prompt(from: data, id: file.deletingPathExtension().lastPathComponent)
             }
+    }
+
+    /// A `.ask` file is JSON `{"question", "options"?}` for tappable choices, or plain text
+    /// for a free-text question.
+    static func prompt(from data: Data, id: String) -> AgentPrompt? {
+        if let payload = try? JSONDecoder().decode(Payload.self, from: data) {
+            let question = payload.question.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !question.isEmpty else { return nil }
+            return AgentPrompt(id: id, question: question, options: payload.options ?? [])
+        }
+        let question = String(decoding: data, as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)
+        return question.isEmpty ? nil : AgentPrompt(id: id, question: question)
+    }
+
+    private struct Payload: Decodable {
+        let question: String
+        let options: [String]?
     }
 
     func answer(id: String, text: String) {

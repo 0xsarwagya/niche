@@ -15,6 +15,16 @@ struct PromptInboxTests {
         #expect(PromptInbox.pending(in: dir) == [AgentPrompt(id: "abc", question: "Deploy to prod?")])
     }
 
+    @Test func readsJsonAskWithOptions() throws {
+        let json = #"{"question":"Deploy?","options":["Yes","No"]}"#
+        #expect(PromptInbox.prompt(from: Data(json.utf8), id: "x")
+            == AgentPrompt(id: "x", question: "Deploy?", options: ["Yes", "No"]))
+    }
+
+    @Test func plainTextHasNoOptions() {
+        #expect(PromptInbox.prompt(from: Data("Hi?".utf8), id: "x")?.options.isEmpty == true)
+    }
+
     @Test func consumesAskFile() throws {
         let dir = tempDir()
         let ask = dir.appendingPathComponent("abc.ask")

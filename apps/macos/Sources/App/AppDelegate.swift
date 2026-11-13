@@ -30,10 +30,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let panel = NotchPanel(screen: screen, model: nowPlaying, weather: weather)
         panel.orderFrontRegardless()
         self.panel = panel
-        nowPlaying.observePrompts(PromptInbox()) { [weak panel] in
-            NSApp.activate(ignoringOtherApps: true)
-            panel?.makeKeyAndOrderFront(nil)
-        }
+        nowPlaying.observePrompts(PromptInbox())
         setUpMenuBar()
         setUpMediaKeys()
         Self.logger.info("Niche launched")

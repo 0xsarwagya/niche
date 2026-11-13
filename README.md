@@ -95,13 +95,18 @@ The notch doubles as a prompt surface: a script or agent can ask a question and 
 answer you type into the notch — no server, just files.
 
 ```bash
+# free-text reply
 answer=$(apps/macos/scripts/niche-ask.sh "Deploy to production?")
+
+# tappable choices — prints the one you pick
+answer=$(apps/macos/scripts/niche-ask.sh --choices "Deploy,Cancel" "Deploy to production?")
 echo "you said: $answer"
 ```
 
-Under the hood: drop a UTF-8 `<id>.ask` file in
-`~/Library/Application Support/Niche/inbox/`; Niche shows it in the notch, and writes your
-reply to `<id>.reply` in the same folder. The CLI just wraps that round-trip.
+Under the hood: drop an `<id>.ask` file in `~/Library/Application Support/Niche/inbox/` —
+plain text for a free-text question, or JSON `{"question": "...", "options": ["Deploy","Cancel"]}`
+for choices. Niche shows it in the notch and writes your reply to `<id>.reply`. A question never
+steals keyboard focus; you click the notch to answer. The CLI just wraps that round-trip.
 
 ## Architecture
 
