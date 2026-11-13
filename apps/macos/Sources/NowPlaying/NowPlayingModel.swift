@@ -74,8 +74,9 @@ final class NowPlayingModel {
     private func presentHUD(_ level: SystemLevel) {
         hud = level
         hudTask?.cancel()
+        let hold: Duration = level.warning ? .seconds(3) : .milliseconds(1400)
         hudTask = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(1400))
+            try? await Task.sleep(for: hold)
             guard let self else { return }
             self.hud = nil
         }

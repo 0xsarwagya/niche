@@ -11,4 +11,5 @@ struct SystemLevel: Equatable, Sendable {
     let kind: Kind
     let value: Double
     var charging: Bool = false
+    var warning: Bool = false
 }

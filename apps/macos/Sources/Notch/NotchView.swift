@@ -33,11 +33,14 @@ struct NotchView: View {
         ZStack(alignment: .top) {
             Color.clear.allowsHitTesting(false)
             island
-                .onHover { model.isHovered = $0 }
-                .animation(.spring(duration: 0.4, bounce: 0.2), value: expanded)
-                .animation(.spring(duration: 0.4, bounce: 0.2), value: track)
-                .animation(.spring(duration: 0.4, bounce: 0.2), value: model.hud)
-                .animation(.spring(duration: 0.4, bounce: 0.2), value: model.timerRemaining != nil)
+                .onHover { hovering in
+                    if hovering, track != nil { Haptics.expand() }
+                    model.isHovered = hovering
+                }
+                .animation(.spring(duration: 0.45, bounce: 0.34), value: expanded)
+                .animation(.spring(duration: 0.45, bounce: 0.34), value: track)
+                .animation(.spring(duration: 0.45, bounce: 0.34), value: model.hud)
+                .animation(.spring(duration: 0.45, bounce: 0.34), value: model.timerRemaining != nil)
                 .animation(.spring(duration: 0.4, bounce: 0.2), value: notchContent == .weather)
         }
     }
@@ -64,7 +67,9 @@ struct NotchView: View {
             case .hidden:
                 EmptyView()
             case .hud:
-                if let hud = model.hud { levelRow(symbol: symbol(for: hud), fraction: hud.value) }
+                if let hud = model.hud {
+                    levelRow(symbol: symbol(for: hud), fraction: hud.value, tint: hud.warning ? .red : .white)
+                }
             case .timer:
                 if let remaining = model.timerRemaining { timerRow(remaining) }
             case .nowPlaying:
@@ -113,6 +118,11 @@ struct NotchView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            Haptics.tap()
+            model.togglePlayPause()
+        }
     }
 
     private var artwork: some View {
@@ -135,23 +145,24 @@ struct NotchView: View {
 
     private func transport(_ track: NowPlaying) -> some View {
         HStack(spacing: 14) {
-            ControlButton(symbol: "backward.fill") { model.previousTrack() }
-            ControlButton(symbol: track.isPlaying ? "pause.fill" : "play.fill") { model.togglePlayPause() }
-            ControlButton(symbol: "forward.fill") { model.nextTrack() }
+            ControlButton(symbol: "backward.fill") { Haptics.tap(); model.previousTrack() }
+            ControlButton(symbol: track.isPlaying ? "pause.fill" : "play.fill") { Haptics.tap(); model.togglePlayPause() }
+            ControlButton(symbol: "forward.fill") { Haptics.tap(); model.nextTrack() }
         }
     }
 
     // MARK: HUD, timer, weather
 
-    private func levelRow(symbol: String, fraction: Double) -> some View {
+    private func levelRow(symbol: String, fraction: Double, tint: Color) -> some View {
         HStack(spacing: 11) {
             Image(systemName: symbol)
                 .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(tint)
                 .frame(width: 20)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     Capsule().fill(.white.opacity(0.22)).frame(height: 4)
-                    Capsule().fill(.white).frame(width: geo.size.width * min(max(fraction, 0), 1), height: 4)
+                    Capsule().fill(tint).frame(width: geo.size.width * min(max(fraction, 0), 1), height: 4)
                 }
                 .frame(maxHeight: .infinity)
             }
@@ -188,7 +199,7 @@ struct NotchView: View {
         switch level.kind {
         case .volume: "speaker.wave.2.fill"
         case .brightness: "sun.max.fill"
-        case .battery: level.charging ? "bolt.fill" : "battery.100"
+        case .battery: level.warning ? "battery.25" : (level.charging ? "bolt.fill" : "battery.100")
         }
     }
 

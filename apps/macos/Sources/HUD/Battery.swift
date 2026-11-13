@@ -16,7 +16,7 @@ struct BatteryMonitor: SystemLevelsSource {
                         }
                         let low = Battery.isLow(percent: snapshot.percent, charging: snapshot.charging)
                         if low, !wasLow {
-                            continuation.yield(snapshot.level)
+                            continuation.yield(snapshot.lowLevel)
                         }
                         lastCharging = snapshot.charging
                         wasLow = low
@@ -37,6 +37,10 @@ enum Battery {
 
         var level: SystemLevel {
             SystemLevel(kind: .battery, value: Double(percent) / 100, charging: charging)
+        }
+
+        var lowLevel: SystemLevel {
+            SystemLevel(kind: .battery, value: Double(percent) / 100, charging: false, warning: true)
         }
     }
 
