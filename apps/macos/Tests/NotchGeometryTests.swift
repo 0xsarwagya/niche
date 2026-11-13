@@ -15,23 +15,27 @@ struct NotchGeometryTests {
     }
 
     @Test func promptWinsOverEverything() {
-        #expect(NotchGeometry.content(prompt: true, hasTrack: true, hud: true, timer: true, weather: true) == .prompt)
+        #expect(NotchGeometry.content(prompt: true, status: true, hasTrack: true, hud: true, timer: true, weather: true) == .prompt)
     }
 
     @Test func hudWinsOverTrack() {
-        #expect(NotchGeometry.content(prompt: false, hasTrack: true, hud: true, timer: true, weather: true) == .hud)
+        #expect(NotchGeometry.content(prompt: false, status: false, hasTrack: true, hud: true, timer: true, weather: true) == .hud)
     }
 
     @Test func timerWinsOverTrack() {
-        #expect(NotchGeometry.content(prompt: false, hasTrack: true, hud: false, timer: true, weather: false) == .timer)
+        #expect(NotchGeometry.content(prompt: false, status: false, hasTrack: true, hud: false, timer: true, weather: false) == .timer)
     }
 
     @Test func weatherShowsOnlyWhenIdle() {
-        #expect(NotchGeometry.content(prompt: false, hasTrack: false, hud: false, timer: false, weather: true) == .weather)
+        #expect(NotchGeometry.content(prompt: false, status: false, hasTrack: false, hud: false, timer: false, weather: true) == .weather)
     }
 
     @Test func trackWinsOverWeather() {
-        #expect(NotchGeometry.content(prompt: false, hasTrack: true, hud: false, timer: false, weather: true) == .nowPlaying)
+        #expect(NotchGeometry.content(prompt: false, status: false, hasTrack: true, hud: false, timer: false, weather: true) == .nowPlaying)
+    }
+
+    @Test func statusShowsOverTrack() {
+        #expect(NotchGeometry.content(prompt: false, status: true, hasTrack: true, hud: false, timer: false, weather: false) == .status)
     }
 
     @Test func expandedMediaRoundsMoreThanCompact() {

@@ -9,6 +9,7 @@ enum NotchGeometry {
         case prompt
         case hud
         case timer
+        case status
         case nowPlaying
         case weather
     }
@@ -21,11 +22,13 @@ enum NotchGeometry {
         return CGRect(x: originX, y: originY, width: size.width, height: size.height)
     }
 
-    /// Resolves what the island shows; a pending question wins, then a transient HUD, a timer, media.
-    static func content(prompt: Bool, hasTrack: Bool, hud: Bool, timer: Bool, weather: Bool) -> Content {
+    /// Resolves what the island shows; a pending question wins, then a transient HUD, a timer,
+    /// an agent status, then media, then the idle weather glance.
+    static func content(prompt: Bool, status: Bool, hasTrack: Bool, hud: Bool, timer: Bool, weather: Bool) -> Content {
         if prompt { return .prompt }
         if hud { return .hud }
         if timer { return .timer }
+        if status { return .status }
         if hasTrack { return .nowPlaying }
         if weather { return .weather }
         return .hidden
@@ -39,7 +42,7 @@ enum NotchGeometry {
             return CGSize(width: notch.width, height: notch.height)
         case .prompt:
             return CGSize(width: max(380, notch.width + 170), height: notch.height + 92)
-        case .hud, .timer, .weather:
+        case .status, .hud, .timer, .weather:
             return CGSize(width: max(300, notch.width + 100), height: notch.height + 44)
         case .nowPlaying:
             let width: CGFloat = hovered ? max(384, notch.width + 190) : max(300, notch.width + 100)
@@ -53,7 +56,7 @@ enum NotchGeometry {
     static func cornerRadius(content: Content, hovered: Bool) -> CGFloat {
         switch content {
         case .hidden: 10
-        case .hud, .timer, .weather: 17
+        case .status, .hud, .timer, .weather: 17
         case .nowPlaying: hovered ? 23 : 20
         case .prompt: 25
         }

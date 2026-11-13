@@ -51,6 +51,7 @@ struct NotchView: View {
         }
         return NotchGeometry.content(
             prompt: model.prompt != nil,
+            status: model.status != nil,
             hasTrack: model.current != nil && prefs.showNowPlaying,
             hud: hudEnabled,
             timer: model.timerRemaining != nil,
@@ -76,6 +77,7 @@ struct NotchView: View {
                 .animation(NicheMotion.morph(reduced: reduced), value: track)
                 .animation(NicheMotion.pulse(reduced: reduced), value: model.hud)
                 .animation(NicheMotion.expand(reduced: reduced), value: model.prompt)
+                .animation(NicheMotion.morph(reduced: reduced), value: model.status)
                 .animation(NicheMotion.morph(reduced: reduced), value: model.timerRemaining != nil)
                 .animation(NicheMotion.morph(reduced: reduced), value: notchContent)
                 .animation(reduced ? nil : .easeInOut(duration: 0.4), value: accent)
@@ -123,6 +125,8 @@ struct NotchView: View {
                 if let hud = model.hud { hudRow(hud) }
             case .timer:
                 if let remaining = model.timerRemaining { timerRow(remaining) }
+            case .status:
+                if let status = model.status { statusRow(status) }
             case .nowPlaying:
                 if let track { nowPlayingBody(track) }
             case .weather:
@@ -293,6 +297,58 @@ struct NotchView: View {
         if remaining <= 10 { return Color(red: 1, green: 0.58, blue: 0.3) }
         if remaining <= 60 { return accent }
         return .white
+    }
+
+    private func statusRow(_ status: AgentStatus) -> some View {
+        HStack(spacing: 11) {
+            statusGlyph(status).frame(width: 22)
+            Text(status.text.isEmpty ? defaultStatusText(status.state) : status.text)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(.white)
+                .lineLimit(1)
+            Spacer(minLength: 6)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .phaseAnimator(status.state == .failure ? [0, -4, 4, -2, 0] : [0], trigger: status.id) { view, dx in
+            view.offset(x: dx)
+        }
+    }
+
+    /// Thinking pulses an accent dot; success bounces a check with a haptic; failure shows red
+    /// and nudges sideways once.
+    @ViewBuilder
+    private func statusGlyph(_ status: AgentStatus) -> some View {
+        switch status.state {
+        case .thinking:
+            if reduced {
+                Circle().fill(accent).frame(width: 8, height: 8)
+            } else {
+                TimelineView(.animation) { timeline in
+                    let pulse = (sin(timeline.date.timeIntervalSinceReferenceDate * 3) + 1) / 2
+                    Circle().fill(accent).frame(width: 8, height: 8).opacity(0.35 + 0.65 * pulse)
+                }
+            }
+        case .success:
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(accent)
+                .symbolEffect(.bounce, value: status.id)
+        case .failure:
+            Image(systemName: "xmark.circle.fill")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.red)
+        case .clear:
+            EmptyView()
+        }
+    }
+
+    private func defaultStatusText(_ state: AgentStatus.State) -> String {
+        switch state {
+        case .thinking: "Working…"
+        case .success: "Done"
+        case .failure: "Failed"
+        case .clear: ""
+        }
     }
 
     private func promptView(_ prompt: AgentPrompt) -> some View {

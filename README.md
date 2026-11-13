@@ -103,10 +103,19 @@ answer=$(apps/macos/scripts/niche-ask.sh --choices "Deploy,Cancel" "Deploy to pr
 echo "you said: $answer"
 ```
 
-Under the hood: drop an `<id>.ask` file in `~/Library/Application Support/Niche/inbox/` —
-plain text for a free-text question, or JSON `{"question": "...", "options": ["Deploy","Cancel"]}`
-for choices. Niche shows it in the notch and writes your reply to `<id>.reply`. A question never
-steals keyboard focus; you click the notch to answer. The CLI just wraps that round-trip.
+Agents can also show a transient **status** (no reply) — a pulsing dot while working, a
+check when done, red on failure:
+
+```bash
+apps/macos/scripts/niche-status.sh thinking "Running tests"
+apps/macos/scripts/niche-status.sh success  "All green"
+```
+
+Under the hood: drop a file in `~/Library/Application Support/Niche/inbox/`. `<id>.ask` is a
+question — plain text, or JSON `{"question": "...", "options": ["Deploy","Cancel"]}` for choices —
+and Niche writes your reply to `<id>.reply`. `<id>.status` is JSON
+`{"state": "thinking|success|failure|clear", "text": "..."}` and expects no reply. A question
+never steals keyboard focus; you click the notch to answer. The CLIs just wrap that.
 
 ## Architecture
 

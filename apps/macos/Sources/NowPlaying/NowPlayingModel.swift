@@ -17,6 +17,7 @@ final class NowPlayingModel {
     private(set) var timerTotal: TimeInterval = 0
     private(set) var promptQueue: [AgentPrompt] = []
     var prompt: AgentPrompt? { promptQueue.first }
+    private(set) var status: AgentStatus?
     var isHovered = false
 
     private let controller: any MediaController
@@ -28,6 +29,7 @@ final class NowPlayingModel {
     private var hudTask: Task<Void, Never>?
     private var countdownTask: Task<Void, Never>?
     private var promptsTask: Task<Void, Never>?
+    private var statusTask: Task<Void, Never>?
     private var inbox: PromptInbox?
 
     init(controller: any MediaController, artworkSource: any ArtworkSource) {
@@ -56,13 +58,32 @@ final class NowPlayingModel {
         levelsTasks.append(task)
     }
 
-    func observePrompts(_ inbox: PromptInbox) {
+    func observe(_ inbox: PromptInbox) {
         self.inbox = inbox
         promptsTask = Task { [weak self] in
-            for await prompt in inbox.prompts {
+            for await item in inbox.items {
                 guard let self else { break }
-                self.promptQueue.append(prompt)
+                switch item {
+                case .prompt(let prompt): self.promptQueue.append(prompt)
+                case .status(let status): self.applyStatus(status)
+                }
             }
+        }
+    }
+
+    private func applyStatus(_ status: AgentStatus) {
+        statusTask?.cancel()
+        guard status.state != .clear else {
+            self.status = nil
+            return
+        }
+        self.status = status
+        if status.state == .success { Haptics.tap() }
+        guard status.state == .success || status.state == .failure else { return }
+        statusTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(2.2))
+            guard let self, self.status?.id == status.id else { return }
+            self.status = nil
         }
     }
 
@@ -87,6 +108,8 @@ final class NowPlayingModel {
         countdownTask = nil
         promptsTask?.cancel()
         promptsTask = nil
+        statusTask?.cancel()
+        statusTask = nil
     }
 
     func showLevel(_ level: SystemLevel) {

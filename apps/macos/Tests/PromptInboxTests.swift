@@ -12,7 +12,17 @@ struct PromptInboxTests {
     @Test func readsAskFileAsPrompt() throws {
         let dir = tempDir()
         try "Deploy to prod?\n".write(to: dir.appendingPathComponent("abc.ask"), atomically: true, encoding: .utf8)
-        #expect(PromptInbox.pending(in: dir) == [AgentPrompt(id: "abc", question: "Deploy to prod?")])
+        #expect(PromptInbox.pending(in: dir) == [.prompt(AgentPrompt(id: "abc", question: "Deploy to prod?"))])
+    }
+
+    @Test func readsStatusFile() {
+        let json = #"{"state":"thinking","text":"Building"}"#
+        #expect(PromptInbox.status(from: Data(json.utf8), id: "s")
+            == AgentStatus(id: "s", state: .thinking, text: "Building"))
+    }
+
+    @Test func rejectsUnknownStatusState() {
+        #expect(PromptInbox.status(from: Data(#"{"state":"bogus"}"#.utf8), id: "s") == nil)
     }
 
     @Test func readsJsonAskWithOptions() throws {
