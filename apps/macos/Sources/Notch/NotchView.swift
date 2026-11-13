@@ -203,13 +203,13 @@ struct NotchView: View {
         }
     }
 
-    static func format(_ remaining: TimeInterval) -> String {
+    nonisolated static func format(_ remaining: TimeInterval) -> String {
         let seconds = max(0, Int(remaining.rounded()))
         return String(format: "%d:%02d", seconds / 60, seconds % 60)
     }
 
     /// Maps a WMO weather code to an SF Symbol.
-    static func weatherSymbol(_ code: Int) -> String {
+    nonisolated static func weatherSymbol(_ code: Int) -> String {
         switch code {
         case 0: "sun.max.fill"
         case 1...3: "cloud.sun.fill"
