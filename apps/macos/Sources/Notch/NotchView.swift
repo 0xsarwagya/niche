@@ -97,8 +97,20 @@ struct NotchView: View {
             .frame(width: islandSize.width, height: islandSize.height)
             .overlay { ambience(in: shape) }
             .overlay(alignment: .top) { content }
+            .overlay(alignment: .bottom) { signature }
             .shadow(color: .black.opacity(notchContent == .hidden ? 0 : 0.35), radius: 7, y: 3)
             .contentShape(Rectangle())
+    }
+
+    /// Niche's signature: one small accent mark centred in the shell's bottom chin — present only
+    /// when the shell has opened, so the idle notch stays invisible. The album accent ties it into
+    /// the rest of the surface.
+    private var signature: some View {
+        Capsule()
+            .fill(accent)
+            .frame(width: 22, height: 3)
+            .padding(.bottom, 4)
+            .opacity(notchContent == .hidden ? 0 : 0.9)
     }
 
     /// A barely-there wash of the album colour inside the expanded media shell — almost
@@ -139,9 +151,13 @@ struct NotchView: View {
         }
         .foregroundStyle(.white)
         .padding(.horizontal, 14)
-        .frame(height: islandSize.height - notch.height)
+        .frame(height: max(0, islandSize.height - notch.height - chin))
         .padding(.top, notch.height)
     }
+
+    /// A thin strip reserved at the shell's bottom for the signature mark, so it never overlaps
+    /// content such as the scrubber.
+    private let chin: CGFloat = 7
 
     // MARK: Now playing
 
