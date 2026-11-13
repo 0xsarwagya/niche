@@ -177,7 +177,7 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 - Lively spring motion, trackpad haptics, and tap-the-island to play/pause.
 - Right-click the notch for quick actions (timer, Settings, Quit); scroll over it to change volume.
 - Countdown timers, started from a menu bar item (which also has Quit).
-- Weather glance on hovering the idle notch (opt-in location; keyless Open-Meteo).
+- Weather glance on hovering the idle notch — temperature, condition, and the day's high/low (opt-in location; keyless Open-Meteo).
 - Launch at login, toggled from the menu bar.
 - Accent colour (equalizer, scrubber) derived from the album artwork.
 - Settings window (⌘,): toggle each module, pick a custom accent, tune the HUD duration.

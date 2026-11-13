@@ -465,6 +465,14 @@ struct NotchView: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 6)
+            if let high = snapshot.highCelsius, let low = snapshot.lowCelsius {
+                VStack(alignment: .trailing, spacing: 1) {
+                    Text("H \(Int(high.rounded()))°")
+                    Text("L \(Int(low.rounded()))°")
+                }
+                .font(.system(size: 10, weight: .medium).monospacedDigit())
+                .foregroundStyle(.white.opacity(0.55))
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

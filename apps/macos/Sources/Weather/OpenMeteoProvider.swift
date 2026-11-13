@@ -22,7 +22,9 @@ struct OpenMeteoProvider: WeatherProvider {
         return WeatherSnapshot(
             temperatureCelsius: decoded.current.temperature,
             conditionCode: decoded.current.weatherCode,
-            observedAt: .now
+            observedAt: .now,
+            highCelsius: decoded.daily?.max.first,
+            lowCelsius: decoded.daily?.min.first
         )
     }
 
@@ -32,6 +34,9 @@ struct OpenMeteoProvider: WeatherProvider {
             URLQueryItem(name: "latitude", value: String(latitude)),
             URLQueryItem(name: "longitude", value: String(longitude)),
             URLQueryItem(name: "current", value: "temperature_2m,weather_code"),
+            URLQueryItem(name: "daily", value: "temperature_2m_max,temperature_2m_min"),
+            URLQueryItem(name: "timezone", value: "auto"),
+            URLQueryItem(name: "forecast_days", value: "1"),
         ]
         return URLRequest(url: components.url!)
     }
@@ -49,6 +54,7 @@ enum WeatherError: Error, Equatable {
 private extension OpenMeteoProvider {
     struct Response: Decodable {
         let current: Current
+        let daily: Daily?
 
         struct Current: Decodable {
             let temperature: Double
@@ -57,6 +63,16 @@ private extension OpenMeteoProvider {
             enum CodingKeys: String, CodingKey {
                 case temperature = "temperature_2m"
                 case weatherCode = "weather_code"
+            }
+        }
+
+        struct Daily: Decodable {
+            let max: [Double]
+            let min: [Double]
+
+            enum CodingKeys: String, CodingKey {
+                case max = "temperature_2m_max"
+                case min = "temperature_2m_min"
             }
         }
     }
