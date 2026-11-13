@@ -4,7 +4,7 @@ import CoreGraphics
 /// The panel is a clear top-anchored stage; the SwiftUI island wraps the notch inside it.
 enum NotchGeometry {
     /// What the island is currently showing, in priority order.
-    enum Content {
+    enum Content: Equatable {
         case hidden
         case prompt
         case hud
@@ -45,6 +45,17 @@ enum NotchGeometry {
             let width: CGFloat = hovered ? max(384, notch.width + 190) : max(300, notch.width + 100)
             let contentHeight: CGFloat = hovered ? 82 : 48
             return CGSize(width: width, height: notch.height + contentHeight)
+        }
+    }
+
+    /// The bottom-corner radius for the current state: the same material reads as more rounded
+    /// the more it has stretched open, so the shell feels elastic rather than like swapped cards.
+    static func cornerRadius(content: Content, hovered: Bool) -> CGFloat {
+        switch content {
+        case .hidden: 10
+        case .hud, .timer, .weather: 17
+        case .nowPlaying: hovered ? 23 : 20
+        case .prompt: 25
         }
     }
 }

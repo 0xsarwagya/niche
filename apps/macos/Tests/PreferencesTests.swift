@@ -28,6 +28,16 @@ struct PreferencesTests {
         #expect(Preferences(store: store).hudSeconds == 2.5)
     }
 
+    @Test func persistsMotion() {
+        let store = freshStore()
+        Preferences(store: store).motion = .expressive
+        #expect(Preferences(store: store).motion == .expressive)
+    }
+
+    @Test func motionDefaultsToSystem() {
+        #expect(Preferences(store: freshStore()).motion == .system)
+    }
+
     @Test func persistsCustomAccent() {
         let store = freshStore()
         Preferences(store: store).customAccent = Color(red: 0.2, green: 0.4, blue: 0.6)

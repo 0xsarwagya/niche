@@ -33,4 +33,14 @@ struct NotchGeometryTests {
     @Test func trackWinsOverWeather() {
         #expect(NotchGeometry.content(prompt: false, hasTrack: true, hud: false, timer: false, weather: true) == .nowPlaying)
     }
+
+    @Test func expandedMediaRoundsMoreThanCompact() {
+        #expect(NotchGeometry.cornerRadius(content: .nowPlaying, hovered: true)
+            > NotchGeometry.cornerRadius(content: .nowPlaying, hovered: false))
+    }
+
+    @Test func promptRoundsMoreThanHud() {
+        #expect(NotchGeometry.cornerRadius(content: .prompt, hovered: false)
+            > NotchGeometry.cornerRadius(content: .hud, hovered: false))
+    }
 }

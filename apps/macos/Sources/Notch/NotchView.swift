@@ -11,9 +11,14 @@ struct NotchView: View {
 
     @State private var reply = ""
     @FocusState private var replyFocused: Bool
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
 
     private var track: NowPlaying? { model.current }
     private var expanded: Bool { track != nil && model.isHovered }
+
+    private var reduced: Bool {
+        NicheMotion.isReduced(Preferences.shared.motion, system: systemReduceMotion)
+    }
 
     private var notchContent: NotchGeometry.Content {
         NotchView.resolveContent(model: model, weather: weather)
@@ -21,6 +26,10 @@ struct NotchView: View {
 
     private var islandSize: CGSize {
         NotchGeometry.islandSize(content: notchContent, hovered: model.isHovered, notch: notch)
+    }
+
+    private var cornerRadius: CGFloat {
+        NotchGeometry.cornerRadius(content: notchContent, hovered: model.isHovered)
     }
 
     private var accent: Color {
@@ -56,28 +65,24 @@ struct NotchView: View {
                     if hovering, track != nil { Haptics.expand() }
                     model.isHovered = hovering
                 }
-                .animation(.spring(duration: 0.45, bounce: 0.34), value: expanded)
-                .animation(.spring(duration: 0.45, bounce: 0.34), value: track)
-                .animation(.spring(duration: 0.45, bounce: 0.34), value: model.hud)
-                .animation(.spring(duration: 0.45, bounce: 0.34), value: model.prompt)
-                .animation(.spring(duration: 0.45, bounce: 0.34), value: model.timerRemaining != nil)
-                .animation(.spring(duration: 0.4, bounce: 0.2), value: notchContent == .weather)
+                .animation(NicheMotion.expand(reduced: reduced), value: expanded)
+                .animation(NicheMotion.morph(reduced: reduced), value: track)
+                .animation(NicheMotion.pulse(reduced: reduced), value: model.hud)
+                .animation(NicheMotion.expand(reduced: reduced), value: model.prompt)
+                .animation(NicheMotion.morph(reduced: reduced), value: model.timerRemaining != nil)
+                .animation(NicheMotion.morph(reduced: reduced), value: notchContent)
         }
     }
 
-    @ViewBuilder
+    /// One persistent black shell: the stable object. It grows from the physical notch and its
+    /// content morphs inside, rather than the whole island being torn down per state.
     private var island: some View {
-        if notchContent == .hidden {
-            Color.clear
-                .frame(width: notch.width, height: notch.height)
-                .contentShape(Rectangle())
-        } else {
-            UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20, style: .continuous)
-                .fill(.black)
-                .frame(width: islandSize.width, height: islandSize.height)
-                .overlay(alignment: .top) { content }
-                .shadow(color: .black.opacity(0.35), radius: 7, y: 3)
-        }
+        UnevenRoundedRectangle(bottomLeadingRadius: cornerRadius, bottomTrailingRadius: cornerRadius, style: .continuous)
+            .fill(.black)
+            .frame(width: islandSize.width, height: islandSize.height)
+            .overlay(alignment: .top) { content }
+            .shadow(color: .black.opacity(notchContent == .hidden ? 0 : 0.35), radius: 7, y: 3)
+            .contentShape(Rectangle())
     }
 
     @ViewBuilder
@@ -136,7 +141,7 @@ struct NotchView: View {
             if expanded {
                 transport(track).transition(.opacity)
             } else {
-                PlayingBars(isPlaying: track.isPlaying, color: accent).transition(.opacity)
+                PlayingBars(isPlaying: track.isPlaying, color: accent, reduced: reduced).transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -337,10 +342,11 @@ private struct Scrubber: View {
     private func clamp(_ value: Double) -> Double { min(max(value, 0), 1) }
 }
 
-/// Three lime bars that bounce while audio is playing.
+/// Three accent bars that bounce while audio is playing; static when motion is reduced.
 private struct PlayingBars: View {
     var isPlaying: Bool
     var color: Color
+    var reduced: Bool
 
     @State private var high = false
     private let lows: [CGFloat] = [5, 5, 5]
@@ -356,7 +362,7 @@ private struct PlayingBars: View {
         }
         .frame(height: 16)
         .opacity(isPlaying ? 1 : 0.45)
-        .animation(.easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: high)
-        .onAppear { high = true }
+        .animation(reduced ? nil : .easeInOut(duration: 0.5).repeatForever(autoreverses: true), value: high)
+        .onAppear { high = !reduced }
     }
 }

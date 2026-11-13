@@ -30,8 +30,17 @@ struct SettingsView: View {
                     }
                 }
             }
+
+            Section("Motion") {
+                Picker("Animation", selection: $prefs.motion) {
+                    Text("System").tag(MotionLevel.system)
+                    Text("Reduced").tag(MotionLevel.reduced)
+                    Text("Expressive").tag(MotionLevel.expressive)
+                }
+                .pickerStyle(.segmented)
+            }
         }
         .formStyle(.grouped)
-        .frame(width: 380, height: 320)
+        .frame(width: 380, height: 400)
     }
 }

@@ -14,6 +14,7 @@ final class Preferences {
     var hudSeconds: Double { didSet { store.set(hudSeconds, forKey: Key.hudSeconds) } }
     var useCustomAccent: Bool { didSet { store.set(useCustomAccent, forKey: Key.useCustomAccent) } }
     var customAccent: Color { didSet { store.set(customAccent.rgbComponents, forKey: Key.customAccent) } }
+    var motion: MotionLevel { didSet { store.set(motion.rawValue, forKey: Key.motion) } }
 
     private let store: UserDefaults
 
@@ -30,6 +31,7 @@ final class Preferences {
         } else {
             customAccent = Preferences.defaultAccent
         }
+        motion = (store.string(forKey: Key.motion)).flatMap(MotionLevel.init(rawValue:)) ?? .system
     }
 
     static let defaultAccent = Color(red: 0.78, green: 0.97, blue: 0.32)
@@ -42,6 +44,7 @@ final class Preferences {
         static let hudSeconds = "hudSeconds"
         static let useCustomAccent = "useCustomAccent"
         static let customAccent = "customAccent"
+        static let motion = "motion"
     }
 }
 
