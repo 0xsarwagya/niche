@@ -15,6 +15,8 @@ final class NowPlayingModel {
     private(set) var hud: SystemLevel?
     private(set) var timerRemaining: TimeInterval?
     private(set) var timerTotal: TimeInterval = 0
+    private(set) var promptQueue: [AgentPrompt] = []
+    var prompt: AgentPrompt? { promptQueue.first }
     var isHovered = false
 
     private let controller: any MediaController
@@ -25,6 +27,8 @@ final class NowPlayingModel {
     private var levelsTasks: [Task<Void, Never>] = []
     private var hudTask: Task<Void, Never>?
     private var countdownTask: Task<Void, Never>?
+    private var promptsTask: Task<Void, Never>?
+    private var inbox: PromptInbox?
 
     init(controller: any MediaController, artworkSource: any ArtworkSource) {
         self.controller = controller
@@ -52,6 +56,23 @@ final class NowPlayingModel {
         levelsTasks.append(task)
     }
 
+    func observePrompts(_ inbox: PromptInbox, onPrompt: @escaping @MainActor () -> Void) {
+        self.inbox = inbox
+        promptsTask = Task { [weak self] in
+            for await prompt in inbox.prompts {
+                guard let self else { break }
+                self.promptQueue.append(prompt)
+                onPrompt()
+            }
+        }
+    }
+
+    func answer(_ text: String) {
+        guard let current = promptQueue.first, let inbox else { return }
+        promptQueue.removeFirst()
+        Task.detached { inbox.answer(id: current.id, text: text) }
+    }
+
     func stop() {
         streamTask?.cancel()
         streamTask = nil
@@ -65,6 +86,8 @@ final class NowPlayingModel {
         hudTask = nil
         countdownTask?.cancel()
         countdownTask = nil
+        promptsTask?.cancel()
+        promptsTask = nil
     }
 
     func showLevel(_ level: SystemLevel) {

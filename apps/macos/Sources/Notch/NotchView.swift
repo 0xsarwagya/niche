@@ -9,6 +9,9 @@ struct NotchView: View {
     let weather: WeatherModel
     let notch: NotchMetrics
 
+    @State private var reply = ""
+    @FocusState private var replyFocused: Bool
+
     private var track: NowPlaying? { model.current }
     private var expanded: Bool { track != nil && model.isHovered }
 
@@ -37,6 +40,7 @@ struct NotchView: View {
         case nil: hudEnabled = false
         }
         return NotchGeometry.content(
+            prompt: model.prompt != nil,
             hasTrack: model.current != nil && prefs.showNowPlaying,
             hud: hudEnabled,
             timer: model.timerRemaining != nil,
@@ -55,6 +59,7 @@ struct NotchView: View {
                 .animation(.spring(duration: 0.45, bounce: 0.34), value: expanded)
                 .animation(.spring(duration: 0.45, bounce: 0.34), value: track)
                 .animation(.spring(duration: 0.45, bounce: 0.34), value: model.hud)
+                .animation(.spring(duration: 0.45, bounce: 0.34), value: model.prompt)
                 .animation(.spring(duration: 0.45, bounce: 0.34), value: model.timerRemaining != nil)
                 .animation(.spring(duration: 0.4, bounce: 0.2), value: notchContent == .weather)
         }
@@ -81,6 +86,8 @@ struct NotchView: View {
             switch notchContent {
             case .hidden:
                 EmptyView()
+            case .prompt:
+                if let prompt = model.prompt { promptView(prompt) }
             case .hud:
                 if let hud = model.hud {
                     levelRow(symbol: symbol(for: hud), fraction: hud.value, tint: hud.warning ? .red : .white)
@@ -196,6 +203,48 @@ struct NotchView: View {
             Spacer(minLength: 6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func promptView(_ prompt: AgentPrompt) -> some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(accent)
+                Text(prompt.question)
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                Spacer(minLength: 0)
+            }
+            HStack(spacing: 6) {
+                TextField("Reply…", text: $reply)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.white)
+                    .focused($replyFocused)
+                    .onSubmit(sendReply)
+                Button(action: sendReply) {
+                    Image(systemName: "arrow.up.circle.fill").font(.system(size: 16))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(accent)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(.white.opacity(0.12), in: Capsule())
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .id(prompt.id)
+        .onAppear { replyFocused = true }
+    }
+
+    private func sendReply() {
+        let text = reply.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        model.answer(text)
+        reply = ""
+        replyFocused = true
     }
 
     private func weatherRow(_ snapshot: WeatherSnapshot) -> some View {

@@ -89,6 +89,20 @@ there and stores it in the Keychain (never in the JSON). The format:
 `{lat}`/`{lon}` are substituted per request; the key goes in `keyParam` (query) or
 `keyHeader` (header); `map` holds dot-paths (array indices allowed) into the response.
 
+## Ask from an agent
+
+The notch doubles as a prompt surface: a script or agent can ask a question and get the
+answer you type into the notch — no server, just files.
+
+```bash
+answer=$(apps/macos/scripts/niche-ask.sh "Deploy to production?")
+echo "you said: $answer"
+```
+
+Under the hood: drop a UTF-8 `<id>.ask` file in
+`~/Library/Application Support/Niche/inbox/`; Niche shows it in the notch, and writes your
+reply to `<id>.reply` in the same folder. The CLI just wraps that round-trip.
+
 ## Architecture
 
 Niche is built as ports and adapters. The domain types (`WeatherSnapshot`,
@@ -152,6 +166,7 @@ stop repeating, is in [CONTRIBUTING](CONTRIBUTING.md).
 - Launch at login, toggled from the menu bar.
 - Accent colour (equalizer, scrubber) derived from the album artwork.
 - Settings window (⌘,): toggle each module, pick a custom accent, tune the HUD duration.
+- Agent prompts: a script asks a question (`niche-ask`) and you answer it inline in the notch.
 
 **Planned**
 

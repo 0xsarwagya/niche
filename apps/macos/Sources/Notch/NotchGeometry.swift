@@ -6,6 +6,7 @@ enum NotchGeometry {
     /// What the island is currently showing, in priority order.
     enum Content {
         case hidden
+        case prompt
         case hud
         case timer
         case nowPlaying
@@ -20,8 +21,9 @@ enum NotchGeometry {
         return CGRect(x: originX, y: originY, width: size.width, height: size.height)
     }
 
-    /// Resolves what the island shows; a transient HUD wins, then a running timer, then media.
-    static func content(hasTrack: Bool, hud: Bool, timer: Bool, weather: Bool) -> Content {
+    /// Resolves what the island shows; a pending question wins, then a transient HUD, a timer, media.
+    static func content(prompt: Bool, hasTrack: Bool, hud: Bool, timer: Bool, weather: Bool) -> Content {
+        if prompt { return .prompt }
         if hud { return .hud }
         if timer { return .timer }
         if hasTrack { return .nowPlaying }
@@ -35,6 +37,8 @@ enum NotchGeometry {
         switch content {
         case .hidden:
             return CGSize(width: notch.width, height: notch.height)
+        case .prompt:
+            return CGSize(width: max(380, notch.width + 170), height: notch.height + 92)
         case .hud, .timer, .weather:
             return CGSize(width: max(300, notch.width + 100), height: notch.height + 44)
         case .nowPlaying:

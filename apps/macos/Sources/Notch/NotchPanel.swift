@@ -42,6 +42,8 @@ private final class PassthroughHostingView: NSHostingView<NotchView> {
 final class NotchPanel: NSPanel {
     private static let logger = Logger(subsystem: "com.niche.app", category: "NotchPanel")
 
+    override var canBecomeKey: Bool { true }
+
     init(screen: NSScreen, model: NowPlayingModel, weather: WeatherModel) {
         let notch = NotchMetrics(screen: screen)
         let frame = NotchGeometry.panelFrame(in: screen.frame)
