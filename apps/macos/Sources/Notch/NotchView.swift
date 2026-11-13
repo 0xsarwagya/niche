@@ -374,10 +374,17 @@ struct NotchView: View {
     private func weatherRow(_ snapshot: WeatherSnapshot) -> some View {
         HStack(spacing: 11) {
             Image(systemName: NotchView.weatherSymbol(snapshot.conditionCode))
-                .font(.system(size: 15, weight: .semibold))
-                .frame(width: 22)
-            Text("\(Int(snapshot.temperatureCelsius.rounded()))°")
                 .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 24)
+            VStack(alignment: .leading, spacing: 0) {
+                Text("\(Int(snapshot.temperatureCelsius.rounded()))°")
+                    .font(.system(size: 15, weight: .semibold))
+                Text(NotchView.weatherText(snapshot.conditionCode))
+                    .font(.system(size: 10))
+                    .foregroundStyle(.white.opacity(0.6))
+                    .lineLimit(1)
+            }
             Spacer(minLength: 6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -394,6 +401,23 @@ struct NotchView: View {
     nonisolated static func format(_ remaining: TimeInterval) -> String {
         let seconds = max(0, Int(remaining.rounded()))
         return String(format: "%d:%02d", seconds / 60, seconds % 60)
+    }
+
+    /// A short human label for a WMO weather code.
+    nonisolated static func weatherText(_ code: Int) -> String {
+        switch code {
+        case 0: "Clear"
+        case 1...2: "Mostly clear"
+        case 3: "Overcast"
+        case 45...48: "Fog"
+        case 51...57: "Drizzle"
+        case 61...67: "Rain"
+        case 71...77: "Snow"
+        case 80...82: "Rain showers"
+        case 85...86: "Snow showers"
+        case 95...99: "Thunderstorm"
+        default: "—"
+        }
     }
 
     /// Maps a WMO weather code to an SF Symbol.
